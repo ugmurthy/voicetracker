@@ -2,35 +2,17 @@ import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix Start Repo!" },
+    { title: "Remix Starter repo" },
+    { name: "description", content: "Welcome to Remix Starter Repo!" },
   ];
 };
 
 export default function Index() {
   return (
-    <div className="container mx-auto max-w-md px-4 ">
+    <div className="container mx-auto max-w-lg px-4 ">
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1 className="text-blue-500 text-3xl">Welcome to Remix</h1>
+      <h1 className="text-blue-500 text-3xl">Welcome Remix Started Repo</h1>
       <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
         <li>
           <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
             Remix Docs
@@ -38,19 +20,19 @@ export default function Index() {
         </li>
       </ul>
     <p>
-      This repo contains the following javascript libraries:
-      <ul>
+      <br/>
+      <div className="text-xl font-semibold">This repo contains the following javascript libraries:</div>
+      <ul className="p-4">
         <li>1. Styling using TailwindCSS and Daisy UI</li>
         <li>2. zod and zodic for schemas, types and validations</li>
         <li>3. Qdrant for vector databases</li>
         <li>4. Prisma for persistent storage</li>
-        <li>5. Future Plans:</li>
-        <li>5.1 Llama-index Llama-parse or some similar tools</li>
-        <li>5.2 Open API libraries, and/or Ollama libraries to access both local and cloud LLMs</li>
-        <li>5.3 ....</li>
-
       </ul>
-
+      <div className="text-xl font-semibold">Features:</div>
+      <ul className="p-4">
+        <li>1. authentication using email and password </li>
+        <li>2. 3rd party authentication using Google</li>
+      </ul>
     </p>
     </div>
     </div>

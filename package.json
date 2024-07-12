@@ -11,13 +11,16 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@prisma/client": "^5.11.0",
     "@qdrant/qdrant-js": "^1.8.1",
     "@radix-ui/react-slot": "^1.0.2",
     "@remix-run/node": "^2.8.1",
     "@remix-run/react": "^2.8.1",
     "@remix-run/serve": "^2.8.1",
+    "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "crypto-random-string": "^5.0.0",
     "isbot": "^4.1.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.363.0",
@@ -29,7 +32,9 @@
     "zodix": "^0.4.4"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.7",
     "@remix-run/dev": "^2.8.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -43,6 +48,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "postcss": "^8.4.38",
+    "prisma": "^5.11.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
