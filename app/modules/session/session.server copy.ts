@@ -1,10 +1,10 @@
-//import type { User, AuthToken } from "@prisma/client/wasm";
+import type { User, AuthToken } from "@prisma/client/wasm";
 import { createCookieSessionStorage,redirect } from "@remix-run/node";
 import bcrypt from 'bcryptjs'
 import cryptoRandomString from 'crypto-random-string';
 import z from 'zod';
-//import zx from 'zodix'
-import db  from '../xata.server'
+import zx from 'zodix'
+import {db } from '../db.server'
 
 const regData = z.object({
     name: z.string(),
@@ -17,45 +17,41 @@ type UserLoginData = {
     password: string;
 }
 
-export async function registerUser({name,email,password}:RegistrationData):Promise<T> {
+export async function registerUser({name,email,password}:RegistrationData):Promise<User> {
     const hashedPassword = await bcrypt.hash(password,10)
-    const data = await db.findUserByEmail(email);
-    const existingUser= Object.keys(data).includes('message');
-    // Error: User Exists
+    const existingUser = await db.user.findUnique({
+        where: {email}
+    });
+
     if (existingUser) { // Error: User Exists
         throw new Error(`User with email: ${email} already exists`);
     }
 
     try { // create new User
-      const user = {name,email,password:hashedPassword}
-        return db.addUser(user)
+        return db.user.create({
+            data: {
+                name,email,password:hashedPassword
+            }
+        })
     } catch (error) {
         throw new Error("Unable to create new user")
     }
 }
 
-export async function loginUser({email,password}:UserLoginData):Promise<T> {
-    const data = await db.findUserByEmail( email );
-    //console.log("loginUser : data",data);
-    const existingUser= Object.keys(data).includes('records') && data.records.length>0;
-    // Error: User Exists
-    if (!existingUser) { // Error: User Exists
-      console.log(`No user found for email: ${email}`);
-      return {user:{},error:{emailError:`No user found for email: ${email}`}};
-       // throw new Error(`User with email: ${email} does NOT exists`);
-    }
-    // got user extract it from data.records
-    const user = data.records[0];
+export async function loginUser({email,password}:UserLoginData):Promise<Users> {
+    const user = await db.user.findUnique({ where: { email } });
     
+    if(!user) {
+        throw new Error(`No user found for email: ${email}`)
+    }
     // first delete all old tokens for this userId
     const delCount= await deleteTokens(user.id);
-    //console.log("Deleted old tokens ",delCount);
+    console.log("Deleted old tokens ",delCount);
     const passwordValid = await bcrypt.compare(password,user.password);
     if (!passwordValid) {
-        console.log("loginUser: Invalid Password");
-        return {user:{},error:{passwordError:"Invalid Password"}};
+        throw new Error("Invalid Password")
     }
-    return {user,error:""};
+    return user;
 }
 
 export async function logout(request: Request) {
@@ -84,7 +80,7 @@ export async function logout(request: Request) {
   });
   export async function createUserSession(user: User, headers = new Headers()) {
     const session = await getSession();
-    session.set('userId', user?user.id:null);
+    session.set('userId', user.id);
     headers.set('Set-Cookie', await commitSession(session));
     return headers;
   }
@@ -111,7 +107,6 @@ export async function logout(request: Request) {
     return userId;
   }
 
-  // 1. get userId from session
   export async function getUserId(request: Request) {
     // two sources for userId - normal cookie and remember me cookie
     const session = await getUserSession(request);
@@ -120,21 +115,22 @@ export async function logout(request: Request) {
       return userId;
     } else {
       const authtoken = await getAuthToken(request)
-      //console.log("getUserId: authtoken",authtoken);
-      userId = authtoken? authtoken.userId.id:null;
+      userId = authtoken?.userId;
       if (!userId || typeof userId !== 'string') return null;
       return userId;
     }
   }
- // 2. get user object from userId
+
   export async function getUser(request: Request) {
     const userId = await getUserId(request);
     if (typeof userId !== 'string') {
       return null;
     }
     try {
-      return await db.findUserById(userId)
-
+      return db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, email: true, createdAt: true, updatedAt: true },
+      });
     } catch {
       throw await logout(request);
     }
@@ -168,13 +164,15 @@ export async function logout(request: Request) {
   type Token = z.infer<typeof TokenSchema>
 
   //add authtoken to db
-  export async function addAuthToken(token:Token):Promise<T>{
+  export async function addAuthToken(token:Token):Promise<AuthToken>{
     const {selector,validator,userId} = token;
     // create hash
     const hashedValidator = await bcrypt.hash(validator,10);
 
     try {
-      return await db.addAuthtoken({selector,hashedValidator,userId})
+      return db.authtoken.create({
+        data:{selector,hashedValidator,userId}
+      })
     } catch (error) {
       throw new Error("Unable to create new authtoken")
     }
@@ -184,24 +182,21 @@ export async function logout(request: Request) {
   // get authtoken
   export async function getAuthToken(request:Request):Promise<AuthToken>{
     const {selector,validator,remember} = await getLoginSession(request);
-    if (!selector) { // there is no cookie for login
+    if (!selector) { // there is not cookie for login
         //console.log("getAuthToken ",selector)
-        return null
+        return {}
     }
 
-    const data = await db.findTokendBySelector(selector);
-    const authtoken = data.records[0];
+    const authtoken = await db.authtoken.findUnique({
+      where:{selector}
+    })
     //console.log("getAuthToken ",JSON.stringify(authtoken,null,2));
     if (authtoken) { // hash
       const validToken = await bcrypt.compare(validator,authtoken.hashedValidator);
       if (validToken) { // check age (EXPIRY)
-        const dateNow = Date.now();
-        const createAt = new Date(authtoken.xata.createdAt);
-        const ageInSecs = parseInt((dateNow-createAt)/1000);
-
-        //console.log("getAuthToken: token is valid.  ageInSecs ",ageInSecs, dateNow/1000,createAt/1000);
+        const ageInSecs = parseInt((Date.now() - new Date(authtoken.createdAt))/1000);
         if (ageInSecs>EXPIRY) {
-          //console.log("getAuthToken: Forcing logout- token expiry ",ageInSecs," > ",EXPIRY)
+          console.log("getAuthToken: Forcing logout- token expiry ",ageInSecs," > ",EXPIRY)
           // deleteMany shifted to loginUser
           throw await logout(request);
           //return {}
@@ -217,7 +212,9 @@ export async function logout(request: Request) {
   export async function deleteTokens(userId:string) {
     
     if (userId) {// deleteMany records with same userId
-      const delCount = await db.authtokenDeleteMany(userId) 
+      const delCount = await db.authtoken.deleteMany({ 
+        where : {userId}
+      })
       return delCount;
     }
   }

@@ -4,8 +4,9 @@ import { requireUserId } from '~/modules/session/session.server';
 
 
 export async function loader(args:LoaderFunctionArgs) {
+  //console.log("LOADER /main")
   const userId = await requireUserId(args.request);
-  console.log("/main ",userId)
+  //console.log("/main ",userId)
   return {userId}  
 }
 

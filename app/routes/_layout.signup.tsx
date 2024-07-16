@@ -1,11 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { Form, useActionData } from "@remix-run/react";
 import type { ActionFunctionArgs } from "@remix-run/node";
-import { createUserSession, loginUser, registerUser } from '../modules/session/session.server'
+import { createUserSession, registerUser } from '../modules/session/session.server'
 import { redirect, json } from "@remix-run/node";
 import { z, ZodError } from "zod";
 import { zx } from "zodix"; // zodix help in validating schemas
-import { sleep } from "~/helpers/util";
+//import db from '../modules/xata.server'
 
 const SignUpSchema = z.object({
   email: z.string().trim().toLowerCase().email({ message: "Invalid email" }),
@@ -20,20 +20,42 @@ function errorAtPath(error: ZodError, path: string) {
   return error.issues.find((issue) => issue.path[0] === path)?.message;
 }
 
+/*
+ db.addUser returns 
+ {
+  "id": "bce8d52f-d826-99af-9aab-97e5d7e83841",
+  "message": "invalid record: column [email]: is not unique"
+ }
+  if email exisits / user exists 
+
+  returns:
+  {
+  "id": "rec_cq8gubfhqm2k22v7g3u0",
+  "xata": {
+    "createdAt": "2024-07-12T11:10:37.847892Z",
+    "updatedAt": "2024-07-12T11:10:37.847892Z",
+    "version": 0
+  }
+} on successful insert.
+*/
+
+
 export async function action(args: ActionFunctionArgs) {
   const result = await zx.parseFormSafe(args.request, SignUpSchema);
-  console.log("ACTION: /signup : Validation Result ",JSON.stringify(result,null,2))
+  //console.log("ACTION: /xsignup : Validation Result ",JSON.stringify(result,null,2))
   //await sleep(2000);// dummy delay to show progress bar
+  let user 
   if (result.success) {
-    const user = await registerUser({
-        email:result.data.email, 
-        password:result.data.password, 
-        name:result.data.name
-    })
-    // check user
-    return redirect('/main', { headers: await createUserSession(user) });
-    // validate user etc....
-    //return json({ success: true, emailError: null, passwordError: null });
+    user = {
+      email:result.data.email, 
+      password:result.data.password, 
+      name:result.data.name
+    }
+    const data = await registerUser({...user});
+    //const data = await db.addUser(user);
+    console.log("ACTION: /signup : db.registerUser Result ",JSON.stringify(data,null,2))
+    
+    return redirect('/main', { headers: await createUserSession(data) });
   }
   // Get the error messages and return them to the client.
   return json({

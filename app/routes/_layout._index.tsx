@@ -1,4 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction,LoaderFunctionArgs } from "@remix-run/node";
+import { requireUserId } from '~/modules/session/session.server';
 
 export const meta: MetaFunction = () => {
   return [
@@ -6,6 +7,13 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "Welcome to Remix Starter Repo!" },
   ];
 };
+
+export async function loader(args:LoaderFunctionArgs) {
+  //console.log("LOADER /main")
+  const userId = await requireUserId(args.request);
+  //console.log("/main ",userId)
+  return {userId}  
+}
 
 export default function Index() {
   return (
