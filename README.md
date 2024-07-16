@@ -4,6 +4,20 @@ This is a starter template for building a RAG (Retrieval Augmented Generation) a
 
 📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/future/vite) for details on supported features.
 
+## What's in the box
+
+1. [Remix](https://remix.run/)
+2. [Tailwind CSS](https://tailwindcss.com/)
+3. [TypeScript](https://www.typescriptlang.org/)
+4. [Vite](https://vitejs.dev/)
+5. [Vercel](https://vercel.com/) for deployment
+
+## Authentication
+
+1. Login/Logout with users on xata.io
+2. Signup with users on xata.io
+3. Protected routes with Remix
+
 ## Development
 
 Run the Vite dev server:
