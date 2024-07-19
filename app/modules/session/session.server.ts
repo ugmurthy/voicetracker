@@ -5,11 +5,13 @@ import cryptoRandomString from 'crypto-random-string';
 import z from 'zod';
 //import zx from 'zodix'
 import db  from '../xata.server'
+import { version } from "react";
 
 const regData = z.object({
     name: z.string(),
     email:z.string(),
     password:z.string(),
+    verified_email:z.boolean(),
 })
 type RegistrationData = z.infer<typeof regData>
 type UserLoginData = {
@@ -17,7 +19,7 @@ type UserLoginData = {
     password: string;
 }
 
-export async function registerUser({name,email,password}:RegistrationData):Promise<T> {
+export async function registerUser({name,email,password,verified_email=false}:RegistrationData):Promise<T> {
     const hashedPassword = await bcrypt.hash(password,10)
     const data = await db.findUserByEmail(email);
     const existingUser= Object.keys(data).includes('message');
@@ -27,7 +29,7 @@ export async function registerUser({name,email,password}:RegistrationData):Promi
     }
 
     try { // create new User
-      const user = {name,email,password:hashedPassword}
+      const user = {name,email,password:hashedPassword,verified_email}
         return db.addUser(user)
     } catch (error) {
         throw new Error("Unable to create new user")
@@ -57,6 +59,93 @@ export async function loginUser({email,password}:UserLoginData):Promise<T> {
     }
     return {user,error:""};
 }
+
+///LoginGoogleUser
+const GoogleProfileData = z.object({
+  email:z.string(),
+  name:z.string(),
+  verified_emai:z.boolean(),
+  picture:z.string(),
+})
+type GoogleLoginData = z.infer<typeof GoogleProfileData>
+
+
+/*
+STEP:1. Check if user exists based on email in google profile
+CASE:2. If user DOES NOT exist, then create a new user
+  a. create a new user including picture processing for xata
+  
+CASE:3. If user exists, then check if user has verified_email=false
+  a. if verified_email=false, then update user with verified_email=true
+  b. update name, picture of needed 
+  c. Update user record
+
+4. create a new token
+5. return user and token
+*/
+export async function loginGoogleUser({email,name,verified_email,picture}:GoogleLoginData):Promise<T> {
+  let data = await db.findUserByEmail( email );
+  //console.log("Google User : data :",data.records);
+  const existingUser= Object.keys(data).includes('records') && data.records.length>0;
+  
+  //CASE 2: USER DOES NOT EXIST : CREATE NEW USER
+  if (!existingUser) { // user does not exist : create new user
+    //console.log(`No user found for email: ${email}`);
+    console.log("Prepare to add Google User");
+    // process picture url 
+    const picField = {base64Content: await db.imageUrlToBase64(picture),
+                      name:"picture.txt",
+                      mediaType: "application/octed-stream",
+                      enablePublicUrl:true} 
+
+    const user = {email,name,verified_email,picture:picField}; // we will add picture later 
+    const ret_val = await db.addUser(user);
+    //console.log("Google User Created: ret_val :",ret_val);
+
+    data = await db.findUserByEmail( email );
+    //console.log("Google User : data :",data.records[0]);
+      
+  } 
+  //CASE 3: USER EXISTS but verified_email is false : update user with Google profile info
+  if (existingUser && !data.records[0].verified_email) { 
+    const verified_email = data.records[0].verified_email;
+    const picExists = data.records[0].picture; 
+    const update_user=data.records[0];
+    delete update_user.xata;
+    delete update_user.family_name;
+    delete update_user.given_name;
+    
+    // if verified_email is false : update it to true
+    if (!verified_email) {
+      update_user.verified_email = true;
+      update_user.password="No Password"
+      update_user.name = name;
+    }
+    if (!picExists) {
+      const picField = {base64Content: await db.imageUrlToBase64(picture),
+        name:"picture.txt",
+        mediaType: "application/octed-stream",
+        enablePublicUrl:true}
+      update_user.picture = picField;
+    }
+    
+    // update user
+    //console.log("update_user ",update_user)
+    const ret_val = await db.addUser(update_user,true); // second param is true for update 
+    //console.log("Google User Updated: ret_val :",ret_val);
+    data = await db.findUserByEmail( email );
+    //console.log("Google User : data :",data.records[0]);
+  }
+  // got user extract it from data.records
+  const user = data.records[0];
+  
+  // first delete all old tokens for this userId
+  const delCount= await deleteTokens(user.id);
+  console.log("Deleted tokens ",delCount)
+  return {user,error:""};
+}
+
+
 
 export async function logout(request: Request) {
     const session = await getUserSession(request);
@@ -180,7 +269,7 @@ export async function logout(request: Request) {
     }
   }
 
-  const EXPIRY = 60 * 60 * 24 * 30 // seconds
+  const EXPIRY = 60 * 60 * 24 * 30 //  (a month in seconds)
   // get authtoken
   export async function getAuthToken(request:Request):Promise<AuthToken>{
     const {selector,validator,remember} = await getLoginSession(request);
@@ -221,3 +310,29 @@ export async function logout(request: Request) {
       return delCount;
     }
   }
+
+
+  // get google user profile and jwt token.
+export async function getGoogleProfile(request:Request) {
+  const formData = await request.formData();
+  const access_token = formData.get("access_token");
+  //const expires_in = formData.get("expires_in");
+  //const scope = formData.get("scope");
+  let userdata
+  try {
+  // fetch profile
+  const res = await fetch(
+          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${access_token}`, {
+              headers: {
+                  Authorization: `Bearer ${access_token}`,
+                  Accept: 'application/json'
+              }
+          })
+       userdata = await  res.json();
+      } catch (error) {
+          console.log("getGoogleProfile: (error) ",error)
+          return null;
+      }
+
+  return userdata;
+}

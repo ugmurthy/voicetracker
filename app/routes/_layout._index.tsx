@@ -34,7 +34,7 @@ export default function Index() {
         <li>1. Styling using TailwindCSS and Daisy UI</li>
         <li>2. zod and zodic for schemas, types and validations</li>
         <li>3. Qdrant for vector databases</li>
-        <li>4. Prisma for persistent storage</li>
+        <li>4. xata.io for persistent storage</li>
       </ul>
       <div className="text-xl font-semibold">Features:</div>
       <ul className="p-4">

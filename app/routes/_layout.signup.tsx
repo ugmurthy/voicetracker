@@ -49,7 +49,8 @@ export async function action(args: ActionFunctionArgs) {
     user = {
       email:result.data.email, 
       password:result.data.password, 
-      name:result.data.name
+      name:result.data.name,
+      verified_email:false,
     }
     const data = await registerUser({...user});
     //const data = await db.addUser(user);

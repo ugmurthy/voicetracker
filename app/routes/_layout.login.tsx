@@ -1,10 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { Form, Link, useActionData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs ,LoaderFunctionArgs} from "@remix-run/node";
 import { createUserSession, loginUser , createLoginSession, addAuthToken, getUserId} from '../modules/session/session.server'
 import { redirect, json } from "@remix-run/node";
 import { z, ZodError } from "zod";
 import { zx } from "zodix"; // zodix help in validating schemas
+import Google from "~/components/Google";
 //import { sleep } from "~/helpers/util";
 
 const schema = z.object({
@@ -42,10 +43,10 @@ export async function action(args: ActionFunctionArgs) {
       const ret_data = await addAuthToken(token)
       //console.log("ACTION /login (addAuthToken) RememberMe=True  ",JSON.stringify(ret_data,null,2));
       //console.log("-------------- redirecting to /main ------------")
-      return redirect('/main',{headers})
+      return redirect('/profile',{headers})
     }
     //console.log("ACTION /login RememberMe=False ",user)
-    return redirect('/main', { headers: await createUserSession(user) });
+    return redirect('/profile', { headers: await createUserSession(user) });
   }
   // Get the error messages and return them to the client.
   return json({
@@ -61,21 +62,23 @@ export async function loader(args:LoaderFunctionArgs) {
   if (userId) {
     return redirect('/main')
   } else {
-    return {}
+    const google_client_id = process.env.GOOGLE_CLIENT_ID;
+    return json({google_client_id});
   }
 }
 export default function Login() {
   const data = useActionData<typeof action>();
-
+  const {google_client_id} = useLoaderData<typeof loader>();
 if (data?.success) {
     return <h1 className="mt-10 pl-40 text-3xl flex flex-col items-start ">Success!</h1>;
   }
   return (
-    <>
-      
+    <div>
+      <Google gid={google_client_id}></Google>
+      <div className="divider px-40"> or </div>
       <Form  method="post" action="/login">
         <div className="max-w-md mx-auto p-6 lg:p-8 text-gray-800 space-y-4 ">
-        <h1 className="pl-40 mt-10 text-3xl flex flex-col items-start ">Login  </h1>
+        <h1 className="text-center text-3xl">Login  </h1>
       <div>
       <label className="input input-bordered input-md flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>
@@ -104,6 +107,6 @@ if (data?.success) {
         </div>
         </div>
       </Form>
-    </>
+    </div>
   );
 }

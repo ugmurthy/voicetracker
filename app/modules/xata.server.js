@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 const db = {}
 
-db.addUser = async (user) => {
+db.addUser = async (user,update=false) => {
     // add user to database (INSERT INTO users (email, name, password))
     /* returns {
          "id": "rec_cq8gubfhqm2k22v7g3u0",
@@ -13,22 +13,28 @@ db.addUser = async (user) => {
         }
     }
   */
+ // if update is true, update user in database (UPDATE users SET email = email, name = name, password = password WHERE id = id)
+ // return updated user
+    const userId = update?user.id:null; // if update then we need to extract id fom user object.
+    if (update) delete user.id; // if update then we need to remove id from user object.
+
     const body = JSON.stringify(user);
     const options = {
-        method: 'POST',
+        method: update?'PATCH':'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.XATA_API_KEY}`
           },
             body: body  // body data type must match "Content-Type" header
         }
+    const UPDATE_URL= process.env.XATA_URL+`/tables/users/data/${userId}?columns=id`
     const URL= process.env.XATA_URL+"/tables/users/data?columns=id"
-    const response = await fetch(URL, options);
+    const response = await fetch(update?UPDATE_URL:URL, options);
     if (response.ok) {
         const data = await response.json()
         return data
     } else {
-        console.log("Error inserting record to user table")
+        console.log(`Error ${options.method}ing record to user table`)
         return null
     }
 }
@@ -70,7 +76,7 @@ db.findUserByEmail = async (email) => {
     // find user by email (SELECT * FROM users WHERE email = email)
     // return user
     const body = JSON.stringify({
-        "columns":["email","name","password"],
+        "columns":["email","name","password","picture.url","verified_email"],
         "filter":{"email":email}
     });
     const options = {
@@ -148,11 +154,12 @@ db.authtokenDeleteMany = async (userId) => {
     }
     let data = await response.json()
     const ids = _.map(data.records, 'id');
-    console.log("Tokens ids to be deleted ",ids);
+    //console.log("Tokens ids to be deleted ",ids);
 
     //2 delete all authtokens for a user (DELETE FROM authtokens WHERE id is in ids)
     // reusing body,options,response,data and URL variables 
     const operations = ids.map(id => ({ delete: {table:"authtokens", id }}));
+    //console.log("operations ",operations);
     body = JSON.stringify({operations});
     options = { 
             method: 'POST',
@@ -166,11 +173,12 @@ db.authtokenDeleteMany = async (userId) => {
     URL= process.env.XATA_URL+"/transaction"
     response = await fetch(URL, options);
     if (!response.ok) {
-        console.log("Error deleting authtokens for user ",userId)
+        //console.log("Error deleting authtokens for user ",userId)
         return null
     }
     data = await response.json()
-    const count = _.sum(_.map(data.result,'rows')) // sum of rows affected in each operation
+    //console.log("delete tokens ",data)
+    const count = _.sum(data.results.map((x)=>{return x.rows}))
     return count;
     // return number of authtokens deleted
 }
@@ -199,4 +207,24 @@ db.findTokendBySelector = async (selector) => {
         return null
     }
 }
+
+
+db.imageUrlToBase64 = async (imageUrl) => {
+    try {
+        // Fetch image data from URL
+        const response = await fetch(imageUrl);
+        // Convert image data to base64 format
+        const imageBlob = await response.blob();
+        const abuff = await imageBlob.arrayBuffer();
+        const imageBase64 = Buffer.from(abuff).toString('base64'); // convert to base64
+        // Return base64 string
+        return imageBase64;
+
+    } catch (error) {
+        console.error('Error converting image URL to base64:', error);
+        return null;
+    }
+}
+
+
 export default db
