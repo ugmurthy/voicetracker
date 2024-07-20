@@ -41,7 +41,6 @@ export async function action(args: ActionFunctionArgs) {
       // add authtoken :store hash of validator in db
       const token = {selector,validator,userId:user.id}
       const ret_data = await addAuthToken(token)
-      //console.log("ACTION /login (addAuthToken) RememberMe=True  ",JSON.stringify(ret_data,null,2));
       //console.log("-------------- redirecting to /main ------------")
       return redirect('/profile',{headers})
     }
