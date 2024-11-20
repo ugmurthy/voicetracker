@@ -1,26 +1,32 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction,LoaderFunctionArgs } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix Start Repo!" },
+    { title: "Remix Starter repo" },
+    { name: "description", content: "Welcome to Remix Starter Repo!" },
   ];
 };
 
+export async function loader(args:LoaderFunctionArgs) {
+  //console.log("LOADER /main")
+  //console.log("/main ",userId)
+  return {}  
+}
+
 export default function Index() {
   return (
-    <div className="container mx-auto max-w-md px-4 ">
+    <div className="container mx-auto max-w-lg px-4 ">
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1 className="text-blue-500 text-3xl">Welcome to Remix</h1>
      
     <p>
-      This repo contains the following javascript libraries:
-      <ul>
+      <br/>
+      <div className="text-xl font-semibold">This repo contains the following javascript libraries:</div>
+      <ul className="p-4">
         <li>1. Styling using TailwindCSS and Daisy UI</li>
         <li>2. zod and zodic for schemas, types and validations</li>
         <li>3. Qdrant for vector databases</li>
       </ul>
-
     </p>
     </div>
     <ul>

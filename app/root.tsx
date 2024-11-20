@@ -32,9 +32,9 @@ export const meta: MetaFunction = () => {
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: tailwindCSS }];
 
 export async function loader() {
-   await sleep(2000);
-   const user="tom";
-  return { user };
+   //await sleep(2000);
+  //const user="tom";
+  return {};
 }
 
 export default function Component() {
