@@ -1,6 +1,8 @@
 
 const BASEURL = "https://api.assemblyai.com/v2/";
 const APIKEY = process.env.ASSEMBLY_API_KEY;
+const EXPIRY=process.env.NODE_ENV==='development'?28800:480
+            
 
 const headers = {
     "Authorization": APIKEY,
@@ -11,7 +13,7 @@ export async function getAssemblyToken() {
     const url = BASEURL + TOKEN;
     console.log('url :',url)
     const body = JSON.stringify({
-        "expires_in": 28800
+        "expires_in": EXPIRY
       })
 
     const response = await fetch(url, {
