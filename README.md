@@ -1,14 +1,15 @@
 # VoiceTracker
-# Welcome to Remix + Vite!
-
-📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/future/vite) for details on supported features.
 
 ## Development
+
+#### Installation
+
+pnpm install
 
 Run the Vite dev server:
 
 ```shellscript
-npm run dev
+pnpm run dev
 ```
 
 ## Deployment
@@ -16,13 +17,13 @@ npm run dev
 First, build your app for production:
 
 ```sh
-npm run build
+pnpm run build
 ```
 
 Then run the app in production mode:
 
 ```sh
-npm start
+pnpm start
 ```
 
 Now you'll need to pick a host to deploy it to.
