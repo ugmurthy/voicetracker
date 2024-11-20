@@ -49,14 +49,16 @@ function Document({ children }: { children: React.ReactNode }) {
   
   return (
     <html lang="en" >
-      <Theme/>
+      
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" /> 
         <Meta />
         <Links />
       </head>
+
       <body className="bg-background dark:bg-darkBackground         text-lg text-text dark:text-darkText">
+      {/*<Theme/>*/}
         <PageTransitionProgressBar />
         {children}
         <ScrollRestoration />
