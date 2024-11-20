@@ -10,6 +10,7 @@ import WordsPerMinute from './WordsPerMin';
 import createWavFile from '~/modules/audioProcessor';
 
 const AudioAssembly = ({url}) => {
+    const VERSION="V0.10 20-Nov-24"
     const samples=false;
     const [messages, setMessages] = useState([]);
     //const [inputMessage, setInputMessage] = useState("");
@@ -172,7 +173,8 @@ useEffect(() => {
       <div className="card-body">
         <div className="rounded-t-lg  w-full h-48 bg-cover bg-center bg-no-repeat bg-opacity-80" style={{"backgroundImage": ""}}>
 
-        <h2 className="pt-20 text-center  text-6xl text-blue-500 font-bold mb-6">SpeechTrack</h2>
+        <h2 className="pt-20 text-center  text-6xl text-blue-500 font-bold ">SpeechTrack</h2>
+        <h2 className='text-xs text-center font-thin text-gray-400 mb-6'>{VERSION}</h2>
         </div>
     </div>
        

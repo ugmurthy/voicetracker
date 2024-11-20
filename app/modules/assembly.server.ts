@@ -18,7 +18,7 @@ const TOKEN= 'realtime/token'
 
 export async function getAssemblyToken() {
     const url = BASEURL + TOKEN;
-    console.log('url :',url)
+    //console.log('url :',url)
     const body = JSON.stringify({
         "expires_in": EXPIRY
       })
@@ -29,11 +29,12 @@ export async function getAssemblyToken() {
         body,
     });
 
-    console.log("======\n",response,"========\n");
+    //console.log("======\n",response,"========\n");
     if (response.status !== 200) {
         throw new Error("Failed to get AssemblyAI token");  
         }
     const data = await response.json();
+    console.log(`f(getAssemblyToken): getting token`)
     return data.token;
 }
 

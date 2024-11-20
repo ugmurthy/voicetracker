@@ -33,7 +33,7 @@ export function analyseAllData(data,msgIncludes="Partial") {
         }
     }
     if (Object.keys(idx).length===0){
-          console.log("No partial transcripts found");
+          //console.log("No partial transcripts found");
           return [[],[],0]
         }
     const ida=[];
