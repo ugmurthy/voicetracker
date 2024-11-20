@@ -3,7 +3,7 @@ import { Outlet } from '@remix-run/react'
 function _layout() {
   return (
     <div>
-        <NavBar></NavBar>
+        {/*<NavBar></NavBar>*/}
         <Outlet/>
     </div>
   )

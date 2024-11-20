@@ -1,13 +1,5 @@
-import React from 'react'
 
 function Theme() {
-    /* const [theme,setTheme] = React.useState('light');
-    const toggleTheme = ()=> {
-        setTheme(theme === 'light'?'dark':'light')
-    }
-    React.useEffect(()=>{
-        document.querySelector('html').setAttribute('data-theme',theme);
-    },[theme]) */
 
   return (
     <div>
