@@ -9,10 +9,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader(args:LoaderFunctionArgs) {
-  //console.log("LOADER /main")
-  const userId = await requireUserId(args.request);
-  //console.log("/main ",userId)
-  return {userId}  
+ return {} 
 }
 
 export default function Index() {
