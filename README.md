@@ -1,4 +1,4 @@
-# Welcome to RAG-REMIX-STARTER
+# Welcome to REMIX-STARTER
 
 This is a starter template for building a RAG (Retrieval Augmented Generation) application using Remix, a full stack web framework by the creators of React Router. for details see below.
 
