@@ -112,14 +112,14 @@ export function getPPMtranscript(data, msgIncludes="Partial",THRESHOLD=0.5) {
   if (transcript.length<2) {
     return {pauses:0,totalTimeInSeconds:0};
   }
-  console.log('f(getPPMtranscript) ',transcript);
+  //console.log('f(getPPMtranscript) ',transcript);
   // const THRESHOLD = 0.5; // in seconds (adjust as needed)
   const MINUTE_IN_SECONDS = 60;
   let pauses = 0;
   const end=transcript[transcript.length - 1].audio_end;
   const start = transcript[0].audio_start;
   let totalTimeInSeconds = (end - start) / 1000;
-  console.log(totalTimeInSeconds);
+  //console.log(totalTimeInSeconds);
   const wordPPM=[]
   wordPPM.push(getPPMwords(transcript[0].words));
   for (let i = 1; i < transcript.length; i++) {
@@ -157,5 +157,19 @@ export function getPPMwords(w, THRESHOLD=0.5) {
   return pauses;
 }
 
-
+// transcript object returned by /api/upload is argument to this func
+export function getTranscriptData(transcript) {
+  if (!transcript) {
+    return null
+  }
+  const text = transcript.text;
+  const wc = text.trim().split(/\s+/).length; //word count
+  const pauses = getPPMwords(transcript.words);
+  let duration = transcript.audio_duration;
+  
+  const d_mins = duration/60
+  const wpm = wc/d_mins // words per min
+  const ppm = pauses/d_mins // pauses per minute
+  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm}
+}
 

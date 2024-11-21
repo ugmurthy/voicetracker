@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {createMicrophone} from '../modules/microphone'
-import { analyseAllData, getPPMtranscript} from '../modules/evalspeech'
+import { analyseAllData, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
 import WordDisplay from './WordsDisplay';
 import ShowData from './ShowData';
 import Clarity from './Clarity';
@@ -8,6 +8,7 @@ import AudioDownloader from './AudioDownloader';
 
 import WordsPerMinute from './WordsPerMin';
 import createWavFile from '~/modules/audioProcessor';
+
 
 const AudioAssembly = ({url}) => {
     const VERSION="V0.10 20-Nov-24"
@@ -21,6 +22,9 @@ const AudioAssembly = ({url}) => {
     const [isRecording, setIsRecording] = useState(false);
     const [audioSamples, setAudioSamples] = useState([]);
    
+    // from child component AudioRecorder //
+    const [tdata,setTdata]=useState(null);//contains transcript data after recording stops
+    const [analysis,setAnalysis]=useState(null);
     const [microphone, setMicrophone] = useState(null);
     const [error, setError] = useState(null);
     const containerRef = useRef();
@@ -111,7 +115,11 @@ useEffect(() => {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [messages.length]); // Re-run effect whenever 'texts' changes
+  useEffect(()=>{
+    console.log("useEffect ",tdata)
+    setAnalysis(getTranscriptData(tdata));
 
+  },[tdata])
   const handleStartRecording = useCallback(async () => {
     try {
       if (!microphone) return;
@@ -145,6 +153,9 @@ useEffect(() => {
     document.location.reload();
   }, []);
 
+  const handleTranscriptUpdate = (tdata) => {
+    setTdata(tdata);
+  };
   //[ida,tot_wc,duration,wpm,txt,tot_confidence] = analyseAllData(messages);
   // the tot_wc is cumulative word count
   // tot_confidence is cumulative confidence averaged over all partials
@@ -168,14 +179,15 @@ useEffect(() => {
   //console.log("Partial PPM :",partial_ppm);
   //console.log("Final PPM :",punctuated_text);
   //console.log("Result :",punctuated_text);
+  console.log("AudioAssembly tdata ",tdata);
+  console.log("AudioAssembly analysis ",analysis)
   return (
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-xl">
       <div className="card-body">
-        <div className="rounded-t-lg  w-full h-48 bg-cover bg-center bg-no-repeat bg-opacity-80" style={{"backgroundImage": ""}}>
-
+        
         <h2 className="pt-20 text-center  text-6xl text-blue-500 font-bold ">SpeechTrack</h2>
         <h2 className='text-xs text-center font-thin text-gray-400 mb-6'>{VERSION}</h2>
-        </div>
+        
     </div>
        
         <div className="flex flex-col items-center gap-6">
@@ -198,7 +210,7 @@ useEffect(() => {
             </div>
             {reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-info btn-xs ">ReConnect</button>:""}
             {/*DOWNLOAD*/}
-            {showDownLoad?<AudioDownloader audioBlob={createWavFile(audioSamples)} fileName={'audio.wav'} />:""}
+            {showDownLoad?<AudioDownloader audioBlob={createWavFile(audioSamples)} fileName={'audio.wav'} update={handleTranscriptUpdate}/>:""}
             {/*STATUS */}
           <div className='flex space-x-2 items-center'>
             
@@ -260,10 +272,20 @@ useEffect(() => {
           </div>
           <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
               {<ShowData data={punctuated_text?.join("")} raw={false} label="Punctuated Transcript"></ShowData>}
+              
           </div>
+          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
+              
+              {<ShowData data={tdata?.text} raw={false} label="Final Transcript"></ShowData>}
+          </div>
+          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
+              {<ShowData data={JSON.stringify(analysis)} raw={false} label="Final Transcript"></ShowData>}
+          </div>
+         
           <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
               {<ShowData data={messages} label="Transcript Data"></ShowData>}
           </div>
+          
         </div>
         } 
       </div>

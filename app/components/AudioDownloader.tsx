@@ -1,6 +1,41 @@
 import { Download } from 'lucide-react';
+import {useState} from 'react';
+import { getTranscriptData } from '~/modules/evalspeech';
+const AudioDownloader = ({ audioBlob, fileName, update }) => {
+//////////////
+// const [transcript,setTranscript]=useState(null)
+// console.log("Transcript ",transcript);
+// const tdata = getTranscriptData(transcript);
+// console.log("Transcript Data: ",tdata)
+//////////////
+async function handleUpload() { 
+  // create File object, formdata and post
+  const wavefile = new File([audioBlob],"audio.wav",{type:audioBlob.type,lastModified:Date.now()})
+  const URL = 'http://localhost:5173/api/upload'
+  console.log("Uploading.... ",wavefile.name,wavefile.size,URL)
+  const formData = new FormData();
+  formData.append("audio",wavefile);
+  const options = {
+      method:"POST",
+      body:formData,
+  }
+  try {
+      const response = await fetch(URL,options);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`)
+      }
+      const data = await response?.json();
+      //setTranscript(data);
+      update(data); // update parent
+      console.log("transcript response:",data)
+  } catch(err) {
+      console.log("Error uploading audio: ",err)
+  }
+}
 
-const AudioDownloader = ({ audioBlob, fileName }) => {
+//////////////
+
+
     const handleDownload = () => {
     
      // const audioBlob = combineAudioChunks(audioChunks);
@@ -23,7 +58,6 @@ const AudioDownloader = ({ audioBlob, fileName }) => {
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
       <div className="card-body items-center text-center">
-        <h2 className="card-title">Audio Player</h2>
         
         <div className="w-full my-4">
           <audio 
@@ -33,19 +67,8 @@ const AudioDownloader = ({ audioBlob, fileName }) => {
           />
         </div>
         
-        <div className="text-sm text-base-content/70 mb-4">
-          {fileName}
-        </div>
-        
         <div className="card-actions">
-          <button
-            onClick={handleDownload}
-            disabled={!audioBlob}
-            className="btn btn-primary gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Download Audio
-          </button>
+        <button onClick={handleUpload} className='btn btn-info'>Analyse Audio</button>
         </div>
         
         {/* Status Message */}

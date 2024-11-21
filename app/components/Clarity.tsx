@@ -13,7 +13,7 @@ function Clarity({confidence}) {
   //console.log("Color ",cval)
 
   const cls = `radial-progress `;
-  console.log("Clarity ,cls",clarity,cls)
+  //console.log("Clarity ,cls",clarity,cls)
   return (
     <div className={cls} style={sty} role="progressbar">{clarity}%</div>
   )
