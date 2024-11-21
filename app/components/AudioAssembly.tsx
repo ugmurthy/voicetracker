@@ -118,7 +118,8 @@ useEffect(() => {
   useEffect(()=>{
     console.log("useEffect ",tdata)
     setAnalysis(getTranscriptData(tdata));
-
+    const id = tdata.id;
+    console.log
   },[tdata])
   const handleStartRecording = useCallback(async () => {
     try {
@@ -179,8 +180,8 @@ useEffect(() => {
   //console.log("Partial PPM :",partial_ppm);
   //console.log("Final PPM :",punctuated_text);
   //console.log("Result :",punctuated_text);
-  console.log("AudioAssembly tdata ",tdata);
-  console.log("AudioAssembly analysis ",analysis)
+  //console.log("AudioAssembly tdata ",tdata);
+  //console.log("AudioAssembly analysis ",analysis)
   return (
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-xl">
       <div className="card-body">
