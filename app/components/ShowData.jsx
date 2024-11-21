@@ -1,20 +1,7 @@
 import React from 'react'
-// set raw = false if data is just text
-// else JSON data will be displayed
-function ShowData({data,raw=true,label=""}) {
+
+function ShowData({data,label=""}) {
     const labelname = label?label:"";
-  if (!raw && typeof data !== "string") {
-    return <div> </div>
-  }
-  // convert each element of the data array to JSON string  
-  let dataStr = [];
-  if (Array.isArray(data)) {
-    dataStr = data.map(item => JSON.stringify(item, 2));
-  }
-  // get jsx element for each element of the dataStr array as a pre element
-  let dataJsx = dataStr.map((item, index) => <pre key={index}>{item}</pre>);
-
-
   return (
     <div className="collapse bg-base-50 rounded-none">
   <input type="checkbox" /> 
@@ -22,12 +9,7 @@ function ShowData({data,raw=true,label=""}) {
     <span className='text-blue-800'>{labelname}</span>...
   </div>
   <div className="collapse-content"> 
-   {raw
-   ? <div className='text-xs font-thin text-left pl-20'>
-    {dataJsx}
-   </div>
-   : <div className='text-xs font-thin text-left pl-20'>{data}</div>
-   }
+    <pre className='text-xs font-thin text-left pl-20'>{JSON.stringify(data,null,2)}</pre>
   </div>
 </div>
   )

@@ -1,5 +1,5 @@
 import type { MetaFunction,LoaderFunctionArgs } from "@remix-run/node";
-
+import { redirect } from "@remix-run/node";
 export const meta: MetaFunction = () => {
   return [
     { title: "Remix Starter repo" },
@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => {
 export async function loader(args:LoaderFunctionArgs) {
   //console.log("LOADER /main")
   //console.log("/main ",userId)
-  return {}  
+  return redirect('/assembly')
 }
 
 export default function Index() {

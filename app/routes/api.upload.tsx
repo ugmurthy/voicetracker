@@ -12,8 +12,8 @@ export async function action({ request }) {
   }
   console.log(`/api/upload :Received file: ${file.name}`);
   const data = await  fileUpload(file)
-  console.log(`/api/upload :file uploaded: ${JSON.stringify(data)} `)
+  //console.log(`/api/upload :file uploaded: ${JSON.stringify(data)} `)
   const transcript_data = await getTranscriptFromURL(data.upload_url);
-  console.log("/api/upload : TranscriptData : ",JSON.stringify(transcript_data))
+  //console.log("/api/upload : TranscriptData : ",JSON.stringify(transcript_data))
   return transcript_data;
 }

@@ -165,11 +165,13 @@ export function getTranscriptData(transcript) {
   const text = transcript.text;
   const wc = text.trim().split(/\s+/).length; //word count
   const pauses = getPPMwords(transcript.words);
+  const confidence = transcript.words.map((w)=>w.confidence)
+  const tot_confidence=_.sum(confidence)/confidence.length
   let duration = transcript.audio_duration;
   
   const d_mins = duration/60
   const wpm = wc/d_mins // words per min
   const ppm = pauses/d_mins // pauses per minute
-  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm}
+  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm,confidence:tot_confidence}
 }
 

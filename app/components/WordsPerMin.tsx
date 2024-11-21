@@ -13,15 +13,17 @@ function WordsPerMinute({wpm}) {
 
   if (!wpm) return <></> 
   const cval = getColor(wpm);
+  //console.log("WPM ",wpm===Infinity,wpm)
+  const _wpm = wpm===Infinity?"":('wpm '+ wpm);
   const sty = { "--value": "70", "--size": "5rem", "--thickness": "8px", "background-color":"green","opacity":"0.8" };
-  sty["--value"] = wpm?.toString();
+  sty["--value"] = _wpm?.toString();
   sty["background-color"] = cval;
   //console.log("Color ",cval)
 
-  const cls = `radial-progress `;
+  const cls = `radial-progress`;
   
   return (
-    <div className={cls} style={sty} role="progressbar">{wpm}</div>
+    <div className={cls} data-tip="Word Per Minute" style={sty} role="progressbar">{wpm}</div>
   )
 }
 

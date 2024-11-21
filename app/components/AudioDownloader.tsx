@@ -3,15 +3,20 @@ import {useState} from 'react';
 import { getTranscriptData } from '~/modules/evalspeech';
 import { useLocation } from '@remix-run/react';
 
-const AudioDownloader = ({ audioBlob, fileName, update }) => {
+const AudioDownloader = ({ audioBlob, fileName, update ,loading=false}) => {
 const location = useLocation();
-
+const [isloading,setIsloading]=useState(loading);
+let btncls = 'btn btn-xs btn-neutral btn-outline '
+if (isloading) {
+  btncls = btncls+ ' loading '
+}
 const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
 let BASEURL=fullUrl.split("/");
 BASEURL.pop()
 
 async function handleUpload() { 
   // create File object, formdata and post
+  setIsloading(true)
   const wavefile = new File([audioBlob],"audio.wav",{type:audioBlob.type,lastModified:Date.now()})
   //const URL = 'http://localhost:5173/api/upload'
   const URL = BASEURL.join("/")+"/api/upload"
@@ -30,7 +35,8 @@ async function handleUpload() {
       const data = await response?.json();
       //setTranscript(data);
       update(data); // update parent
-      console.log("transcript response:",data)
+      console.log("transcript response:",isLoading,data)
+      setIsloading(false)
   } catch(err) {
       console.log("Error uploading audio: ",err)
   }
@@ -59,7 +65,7 @@ async function handleUpload() {
     <div className="card w-96 bg-base-100 shadow-xl">
       <div className="card-body items-center text-center">
         
-        <div className="w-full my-4">
+        <div className="w-full my-2">
           <audio 
             controls 
             src={audioBlob ? URL.createObjectURL(audioBlob) : ''} 
@@ -68,7 +74,7 @@ async function handleUpload() {
         </div>
         
         <div className="card-actions">
-        <button onClick={handleUpload} className='btn btn-info'>Analyse Audio</button>
+        <button onClick={handleUpload} className={btncls}>Analyse Audio</button>
         </div>
         
         {/* Status Message */}

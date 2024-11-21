@@ -5,19 +5,19 @@ import WordDisplay from './WordsDisplay';
 import ShowData from './ShowData';
 import Clarity from './Clarity';
 import AudioDownloader from './AudioDownloader';
+import Markdown from './Markdown'
 
 import WordsPerMinute from './WordsPerMin';
 import createWavFile from '~/modules/audioProcessor';
 
 
 const AudioAssembly = ({url}) => {
-    const VERSION="V0.10 20-Nov-24"
-    const samples=false;
+    const VERSION="V0.3 21-Nov-24"
+    //const samples=false;
     const [messages, setMessages] = useState([]);
-    //const [inputMessage, setInputMessage] = useState("");
     const wsRef = useRef(null); //  persist WebSocket instance
     const [isOPEN,setIsOPEN] = useState(false)
-    //const isOPEN = wsRef.current && wsRef.current.readyState === WebSocket.OPEN
+    
     const terminate = {"terminate_session": true};
     const [isRecording, setIsRecording] = useState(false);
     const [audioSamples, setAudioSamples] = useState([]);
@@ -25,12 +25,15 @@ const AudioAssembly = ({url}) => {
     // from child component AudioRecorder //
     const [tdata,setTdata]=useState(null);//contains transcript data after recording stops
     const [analysis,setAnalysis]=useState(null);
+    // feedback
+    const [feedback,setFeedback]=useState(null);
+
     const [microphone, setMicrophone] = useState(null);
     const [error, setError] = useState(null);
     const containerRef = useRef();
     const isConnecting = !error && !isOPEN && !isRecording && messages.length === 0;
     const reConnect =error || ( !isOPEN && !isRecording && messages.length  > 0);
-    const showDownLoad = reConnect && !error;
+    const showDownLoad = reConnect && !error && !feedback;
     
     /// WebSockets useEffet
 useEffect(() => {
@@ -115,12 +118,47 @@ useEffect(() => {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [messages.length]); // Re-run effect whenever 'texts' changes
+  // analysis
   useEffect(()=>{
-    console.log("useEffect ",tdata)
-    setAnalysis(getTranscriptData(tdata));
-    const id = tdata.id;
-    console.log
+    const  feedback= async() => {
+      try {
+      const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
+      let BASEURL=fullUrl.split("/");
+      BASEURL.pop()
+      const headers = {
+        "content-type": "application/json",
+      };
+      const body = JSON.stringify(_analysis)
+      const URL = BASEURL.join("/")+"/api/feedback"
+      const options={method:"POST",headers,body}
+      const response = await fetch(URL,options);
+      if (response.ok) {
+        const result =  await response.json()
+        setFeedback(result)
+      } else {
+        console.log("Error during POST /api/feedback ", response)
+      }
+    } // try
+    catch (e){
+      console.log("Error /api/feedback ");
+    }
+    }
+    // analyse transcription
+    const _analysis =getTranscriptData(tdata)
+    // add id
+    if (_analysis) {
+        // we have some data
+        _analysis.id = tdata?.id
+    }
+    setAnalysis(_analysis);
+    //const id = tdata?.id;
+    console.log("useEffect analysis",_analysis);
+    feedback(); 
+    
   },[tdata])
+  // results
+
+
   const handleStartRecording = useCallback(async () => {
     try {
       if (!microphone) return;
@@ -167,7 +205,7 @@ useEffect(() => {
 
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
   const confidence =tot_confidence?(tot_confidence?.toFixed(2)*100):""
-  const wpmStr = wpm?wpm:"" + " wpm"
+  const wpmStr = wpm===Infinity?wpm:"" + " wpm"
 
   const final_ida = finalResult[0];
   const punctuated_text = finalResult[4]
@@ -176,20 +214,16 @@ useEffect(() => {
   const partial_data = ida?.map(r=>messages[r[0]])
   //const final_data = finalResult[0]?.map(r=>messages[r[0]]);
   const partial_ppm = partial_data?.length!==0? getPPMtranscript(partial_data)?.ppm:[];
-  //const final_ppm = final_data?.length!==0?getPPMtranscript(final_data,"Final")?.ppm:[];
-  //console.log("Partial PPM :",partial_ppm);
-  //console.log("Final PPM :",punctuated_text);
-  //console.log("Result :",punctuated_text);
-  //console.log("AudioAssembly tdata ",tdata);
-  //console.log("AudioAssembly analysis ",analysis)
+  
   return (
-    <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-xl">
-      <div className="card-body">
+    <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-lg">
+      
         
-        <h2 className="pt-20 text-center  text-6xl text-blue-500 font-bold ">SpeechTrack</h2>
-        <h2 className='text-xs text-center font-thin text-gray-400 mb-6'>{VERSION}</h2>
+        <div className="pt-4 text-center  text-4xl text-blue-700 font-bold ">VoiceTrack</div>
+        < div className='text-xs text-center font-thin text-blue-700'><a href='https://www.assemblyai.com/' target="_blank">Driven by AssemblyAI</a></div>
+        <div className='text-xs text-center font-thin text-gray-400 mb-6'>{VERSION}</div>
         
-    </div>
+    
        
         <div className="flex flex-col items-center gap-6">
           <div className='flex space-x-2 items-center'>
@@ -209,21 +243,26 @@ useEffect(() => {
             </button>
             <WordsPerMinute wpm={wpm}/>
             </div>
-            {reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-info btn-xs ">ReConnect</button>:""}
+            {reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-neutral btn-xs ">ReConnect</button>:""}
             {/*DOWNLOAD*/}
-            {showDownLoad?<AudioDownloader audioBlob={createWavFile(audioSamples)} fileName={'audio.wav'} update={handleTranscriptUpdate}/>:""}
+            {showDownLoad?<AudioDownloader 
+              audioBlob={createWavFile(audioSamples)} 
+              fileName={'audio.wav'} 
+              update={handleTranscriptUpdate}
+              loading={false}
+            />:""}
             {/*STATUS */}
-          <div className='flex space-x-2 items-center'>
+          <div className='flex space-x-2 items-center mb-2'>
             
             { (!isOPEN) ? <span className="badge badge-md badge-error">Disconnected</span> : <span className="badge badge-md badge-info">Connected</span> }
             
             {messages.length > 0 ?
             <>
             <span className="badge badge-neutral badge-md">{tot_wc} words</span>
-            <span className='badge badge-neutral badge-md'>{wpmStr}</span>
+            <span className='badge badge-neutral badge-md'>{wpmStr} </span>
             <span className='badge badge-neutral badge-md'>Duration {durationStr}</span>
             <span className='badge badge-neutral badge-md'>Clarity {confidence}</span>
-            <span className='badge badge-neutral badge-md'>Partial ppm {partial_ppm}</span>
+            <span className='badge badge-neutral badge-md'>ppm {partial_ppm}</span>
            
              </>:""}
             </div>
@@ -232,19 +271,22 @@ useEffect(() => {
 
         {error && (
           <div className="p-4 text-center">
-            
             <span className='text-red-400 font-bold'>{error}</span>
           </div>
         )}
         {/*Main Sections - show only if there aren't any errors */}
         {((!error)&&!isConnecting)&&
         <div className="p-4 space-y-4 z-10">
+          {/*Analysis&Feedback*/}
+          {feedback && <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
+          <Markdown markdown={'## Analysis & Feedback\n\n '+feedback}></Markdown>
+          </div>}
           {/*Transcription */}
           <div ref={containerRef} className="p-4  overflow-y-auto rounded-box border border-base-300">
-            {messages.length !== 0 &&  (
+            {messages.length > 5 &&  (
               <div className=' p-10 w-full bg-gray-100 rounded-lg'>
                 <div className=''>
-                <div className='divider'>PartialTranscript</div>
+                <div className='divider text-gray-500 text-sm font-thin'>Real Time Transcript indcating word confidence score in color</div>
                 { 
                 ida.map((ary_id, index) => (
                     <div key={index} className="flex flex-wrap">
@@ -254,38 +296,17 @@ useEffect(() => {
                   ))
                 }
               </div>
-              <div className='divider'>FinalTranscript</div>
-              <div className=''>
-                { 
-                final_ida.map((ary_id, index) => (
-                    <div key={index} className="flex flex-wrap">
-                        <WordDisplay  words={messages[ary_id[0]].words}/>    
-                     </div>
-  
-                  ))
-                }
-              </div>
-             
-
+              
               </div>
               
             )}
           </div>
-          <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
-              {<ShowData data={punctuated_text?.join("")} raw={false} label="Punctuated Transcript"></ShowData>}
-              
-          </div>
-          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
-              
-              {<ShowData data={tdata?.text} raw={false} label="Final Transcript"></ShowData>}
-          </div>
-          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
-              {<ShowData data={JSON.stringify(analysis)} raw={false} label="Final Transcript"></ShowData>}
-          </div>
-         
-          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
-              {<ShowData data={messages} label="Transcript Data"></ShowData>}
-          </div>
+       
+
+         {feedback&& <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
+              <ShowData data={analysis}  label="VoiceTrack Analysis"></ShowData>
+            <ShowData data={messages}  label="Real Time Stream data"></ShowData>
+          </div>}
           
         </div>
         } 
@@ -308,4 +329,18 @@ messages.map((message, index) => (
                         <WordDisplay  words={message.words}/>    
                      </li>
 
+                     <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
+              {<ShowData data={punctuated_text?.join("")}  label="Punctuated Transcript"></ShowData>}
+          </div>
+          
+
+
+
+          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
+              {<ShowData data={tdata?.text} label="Audio Transcript"></ShowData>}
+          </div>
+            
+          <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
+              {<ShowData data={messages} label="Audio Stream Data"></ShowData>}
+          </div>
 */

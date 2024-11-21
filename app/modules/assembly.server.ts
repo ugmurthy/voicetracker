@@ -1,6 +1,7 @@
 
 
 import {AssemblyAI} from 'assemblyai'
+import {leMURbody} from '../modules/system'
 const client = new AssemblyAI({
     apiKey: process.env.ASSEMBLY_API_KEY 
   })
@@ -79,17 +80,19 @@ export async function fileUpload(file:File) {
 
 // SDK assembly API
 // use assembly.ai api to get transcript give an audio blob
-export async function askLeMUR(transcript) {
-    const prompt = 'Provide a brief summary of the transcript';
+export async function askLeMUR(transcript_id,results) {
+    let prompt = leMURbody.prompt
+    prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
+    prompt = prompt+ " Provide your analysis and feedback for the transcript in MARKDOWN that is human readable"
     let retval
     try {
      retval = await client.lemur.task({
-        transcript_ids:[transcript.id],
+        transcript_ids:[transcript_id],
         prompt,
         final_model:'anthropic/claude-3-5-sonnet'
     })
-    console.log("LeMUR Response");
-    console.log(retval);
+    console.log("f(askLeMUR): Response");
+    //console.log(retval.response);
     return retval.response;
     } catch(e) {
         console.log("Error Response ",retval)

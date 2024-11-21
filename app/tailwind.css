@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    h2 {
+        @apply text-2xl font-bold text-gray-600 mb-4;
+      }
+
+    h3 {
+      @apply text-xl font-bold text-gray-600 my-2;
+    }
+  }
