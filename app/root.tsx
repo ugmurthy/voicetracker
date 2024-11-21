@@ -19,12 +19,12 @@ import Theme from './components/Theme';
 export const meta: MetaFunction = () => {
   return [
     {
-      title: 'RAG Starter',
+      title: 'SpeechTrack',
     },
     {
-      name: 'description',
+      name: 'SpeechTrack',
       content:
-        'RAG Starter Repo',
+        'Realtime Speech Analysis using Assembly AI',
     },
   ];
 };
