@@ -99,7 +99,8 @@ export async function askLeMUR(transcript) {
 
 export async function getTranscriptFromURL(audioURL){
     try {
-        const transcript = await client.transcripts.transcribe({audio:audioURL})
+        const params = {audio:audioURL,disfluencies:true}
+        const transcript = await client.transcripts.transcribe(params)
         return transcript
     } catch (e) {
         console.log("f(getTranscriptFromURL) Error ",e)

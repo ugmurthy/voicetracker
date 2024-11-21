@@ -1,17 +1,20 @@
 import { Download } from 'lucide-react';
 import {useState} from 'react';
 import { getTranscriptData } from '~/modules/evalspeech';
+import { useLocation } from '@remix-run/react';
+
 const AudioDownloader = ({ audioBlob, fileName, update }) => {
-//////////////
-// const [transcript,setTranscript]=useState(null)
-// console.log("Transcript ",transcript);
-// const tdata = getTranscriptData(transcript);
-// console.log("Transcript Data: ",tdata)
-//////////////
+const location = useLocation();
+
+const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
+let BASEURL=fullUrl.split("/");
+BASEURL.pop()
+
 async function handleUpload() { 
   // create File object, formdata and post
   const wavefile = new File([audioBlob],"audio.wav",{type:audioBlob.type,lastModified:Date.now()})
-  const URL = 'http://localhost:5173/api/upload'
+  //const URL = 'http://localhost:5173/api/upload'
+  const URL = BASEURL.join("/")+"/api/upload"
   console.log("Uploading.... ",wavefile.name,wavefile.size,URL)
   const formData = new FormData();
   formData.append("audio",wavefile);
@@ -32,9 +35,6 @@ async function handleUpload() {
       console.log("Error uploading audio: ",err)
   }
 }
-
-//////////////
-
 
     const handleDownload = () => {
     
