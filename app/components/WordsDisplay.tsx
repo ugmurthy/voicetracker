@@ -18,16 +18,16 @@ const WordDisplay = ({ words }) => {
   };
 
   const getWordClasses = (confidence) => {
-    let classes = '';
+    let classes = ' font-semibold ';
   
     if (confidence >= 0.9) {
-      classes += 'text-green-500 font-bold ';
-    } else if (confidence >= 0.7) {
+      classes += 'text-green-500  ';
+    } else if (confidence >= 0.8) {
       classes += 'text-blue-500';
     } else if (confidence >= 0.5) {
-      classes += 'text-orange-500';
+      classes += 'text-orange-400';
     } else {
-      classes += 'text-red-500 font-semibold';
+      classes += 'text-red-600 ';
     }
   
     return classes;

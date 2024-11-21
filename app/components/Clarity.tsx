@@ -2,7 +2,7 @@
 
 function Clarity({confidence}) {
   let clarity = !confidence?0:confidence;
-  if (!clarity) return <></>
+  if (!clarity) return <div className="flex justify-center  rounded-full w-16 h-16 bg-gray-100 items-center tooltip tooltip-left" data-tip="Confidence Score">Clarity</div> 
   if (clarity > 100) clarity = 100;
   if (clarity < 0) clarity = 0
   const cval = getColor(clarity);
@@ -25,7 +25,7 @@ export default Clarity
 function getColor(value) {
   // clarity is 0-100 0 is bad 100 is good
 
-  if (value >= 70) {
+  if (value >= .70) {
     return '#22c55e'; // green-500
   } else if (value >= 0.50) {
     return '#3b82f6'; // blue-500

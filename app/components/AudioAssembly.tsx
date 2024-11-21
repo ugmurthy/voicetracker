@@ -205,7 +205,7 @@ useEffect(() => {
 
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
   const confidence =tot_confidence?(tot_confidence?.toFixed(2)*100):""
-  const wpmStr = wpm===Infinity?wpm:"" + " wpm"
+  const wpmStr = wpm===Infinity|| !wpm?"wpm": (wpm +" wpm")
 
   const final_ida = finalResult[0];
   const punctuated_text = finalResult[4]
@@ -219,8 +219,8 @@ useEffect(() => {
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-lg">
       
         
-        <div className="pt-4 text-center  text-4xl text-blue-700 font-bold ">VoiceTrack</div>
-        < div className='text-xs text-center font-thin text-blue-700'><a href='https://www.assemblyai.com/' target="_blank">Driven by AssemblyAI</a></div>
+        <div className="pt-4 text-center  text-4xl text-blue-700 font-bold ">SpeechTrack</div>
+        < div className='text-xs text-center  text-blue-700'>Get a deeper understanding of Speech with <a href='https://www.assemblyai.com/' target="_blank" className='underline' > AssemblyAI</a></div>
         <div className='text-xs text-center font-thin text-gray-400 mb-6'>{VERSION}</div>
         
     

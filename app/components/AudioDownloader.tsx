@@ -1,6 +1,6 @@
-import { Download } from 'lucide-react';
+//import { Download } from 'lucide-react';
 import {useState} from 'react';
-import { getTranscriptData } from '~/modules/evalspeech';
+//import { getTranscriptData } from '~/modules/evalspeech';
 import { useLocation } from '@remix-run/react';
 
 const AudioDownloader = ({ audioBlob, fileName, update ,loading=false}) => {

@@ -11,10 +11,10 @@ function WordsPerMinute({wpm}) {
 
   */
 
-  if (!wpm) return <></> 
+  if (!wpm||wpm===Infinity) return <div className="flex justify-center  rounded-full w-16 h-16 bg-gray-100 items-center tooltip tooltip-right" data-tip="Words Per Minute">Tempo</div> 
   const cval = getColor(wpm);
   //console.log("WPM ",wpm===Infinity,wpm)
-  const _wpm = wpm===Infinity?"":('wpm '+ wpm);
+  const _wpm = wpm===Infinity?0: wpm;
   const sty = { "--value": "70", "--size": "5rem", "--thickness": "8px", "background-color":"green","opacity":"0.8" };
   sty["--value"] = _wpm?.toString();
   sty["background-color"] = cval;
@@ -34,21 +34,21 @@ function getColor(value) {
   // clarity is 0-100 0 is bad 100 is good
 
   if (value>=120 && value <= 140) {
-    return 'green';
+    return '#22c55e';
   }
   if (value<=120 && value >= 100) {
-    return 'yellow';
+    return '#fde047';
   }
   if (value>=140 && value <= 160) {
-    return 'yellow';
+    return '#fde047';
   }
   if (value<=100) {
-    return 'red';
+    return '#ef4444';
   }
   if (value>=160) {
-    return 'red';
+    return '#ef4444';
   }
-  return 'red';
+  return '#ef4444';
 }
 
 
