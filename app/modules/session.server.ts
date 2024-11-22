@@ -38,7 +38,7 @@ const { getSession, commitSession, destroySession } =
  // return a session token based on apikey - the recepient can store this in session 
  async function validAPI(apikey:string, route:string) {
     const token = await getAssemblyToken(apikey); // check by getting token
-    console.log(`f(validAPI): ${token}`)
+    console.log(`f(validAPI) via ${route}`)
   if(token)  {
     return token;
   } else {
@@ -51,8 +51,8 @@ const { getSession, commitSession, destroySession } =
   const session = await getSession();
   session.set('apikey', apikey);
   session.set('token',token);
-  console.log(`f(createAPISession) ${apikey}`)
-  console.log(`f(createAPISession) ${token}`)
+  console.log(`f(createAPISession) Got apikey,token`)
+  
   headers.set('Set-Cookie', await commitSession(session));
   return headers;
 }
@@ -75,7 +75,7 @@ async function getSessionToken(request: Request) {
     try {  
     const session = await getSession(request.headers.get('Cookie'));
     const token = session.get('token');
-    console.log('f(getSessionToken): ', token);
+    console.log('f(getSessionToken): Got token ');
     return token;
     } catch(e) {
       console.log("f(getSessionToken): Error ",e)

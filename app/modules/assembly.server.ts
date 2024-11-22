@@ -1,7 +1,7 @@
 
 
 import {AssemblyAI} from 'assemblyai'
-import {leMURbody} from '../modules/system'
+import {leMURbody} from './system.server'
 const client = new AssemblyAI({
     apiKey: process.env.ASSEMBLY_API_KEY 
   })
@@ -89,6 +89,10 @@ export async function fileUpload(file:File) {
 // SDK assembly API
 // use assembly.ai api to get transcript give an audio blob
 export async function askLeMUR(transcript_id,results) {
+    // inject Instruction prompt with
+    // structured results
+    // and final instruction for the task and output format
+    console.log("f(askLeMUR) command ",results?.command);
     let prompt = leMURbody.prompt
     prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
     prompt = prompt+ " Provide your analysis and feedback for the transcript in MARKDOWN that is human readable"

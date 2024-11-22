@@ -23,6 +23,7 @@ export function analysePartial(partial) {
 // 4. wordsper minute
 // [ida,wc,duration,wpm]
 export function analyseAllData(data,msgIncludes="Partial") {
+    //console.log("f(analyseAllData)")
     let idx={}
     let wc=0;
     for (let i=0;i<data.length;i++) {
@@ -34,7 +35,8 @@ export function analyseAllData(data,msgIncludes="Partial") {
     }
     if (Object.keys(idx).length===0){
           //console.log("No partial transcripts found");
-          return [[],[],0]
+          //[ida,tot_wc,duration,wpm,txt,tot_confidence]
+          return [[],0,0,0,'',0]
         }
     const ida=[];
     _.forEach(idx, (value, key) => {ida.push([value,key])});
@@ -172,6 +174,19 @@ export function getTranscriptData(transcript) {
   const d_mins = duration/60
   const wpm = wc/d_mins // words per min
   const ppm = pauses/d_mins // pauses per minute
-  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm,confidence:tot_confidence}
+  const command = getCommand(transcript.words);
+  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm,confidence:tot_confidence,command}
 }
 
+const SUMMARY=['hash', 'mode', 'summary'].join('')
+
+function getCommand(words) {
+  if (words.length>5) {
+    const w = words.slice(0,5).join('');
+    if (w.includes(SUMMARY)) {
+      return {command: {text:'chat',index:_.indexOf(words,'chat')}}
+    }
+    // extend commands with ifs
+    return null;
+  }
+}

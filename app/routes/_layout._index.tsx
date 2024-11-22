@@ -54,6 +54,8 @@ export default function Index() {
             Submit
         </button>
         {(actionData?.error && actionData.error )?<div><p className="text-red-600 font-bold">{actionData.error}</p></div>:""}
+    
+        {/*@TODO add some text providing more info  */}
     </Form>
     
 </div>

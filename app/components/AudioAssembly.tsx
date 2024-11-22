@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {createMicrophone} from '../modules/microphone'
+import {Link} from '@remix-run/react'
+import {createMicrophone} from '../modules/microphone.client'
 import { analyseAllData, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
 import WordDisplay from './WordsDisplay';
 import ShowData from './ShowData';
@@ -8,7 +9,7 @@ import AudioDownloader from './AudioDownloader';
 import Markdown from './Markdown'
 
 import WordsPerMinute from './WordsPerMin';
-import createWavFile from '~/modules/audioProcessor';
+import createWavFile from '~/modules/audioProcessor.client';
 
 
 const AudioAssembly = ({url}) => {
@@ -206,8 +207,9 @@ useEffect(() => {
   // the tot_wc is cumulative word count
   // tot_confidence is cumulative confidence averaged over all partials
   // txt is an array of sentences
+  
   const [ida,tot_wc,duration,wpm,txt,tot_confidence]=analyseAllData(messages);
-
+  
   const finalResult = analyseAllData(messages,"Final");
 
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
@@ -250,7 +252,8 @@ useEffect(() => {
             </button>
             <WordsPerMinute wpm={wpm}/>
             </div>
-            {reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-neutral btn-xs ">ReConnect</button>:""}
+            {/*reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-neutral btn-xs ">ReConnect</button>:""*/}
+            {reConnect?<button className="btn btn-outline shadow-xl  btn-neutral btn-xs "><Link to="/api/token">ReConnect</Link></button>:""}
             {/*DOWNLOAD*/}
             {showDownLoad?<AudioDownloader 
               audioBlob={createWavFile(audioSamples)} 
