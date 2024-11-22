@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {Link} from '@remix-run/react'
 import {createMicrophone} from '../modules/microphone.client'
-import { analyseAllData, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
+import { analyseAllData, getFirstFinalText, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
 import WordDisplay from './WordsDisplay';
 import ShowData from './ShowData';
 import Clarity from './Clarity';
@@ -38,7 +38,7 @@ const AudioAssembly = ({url}) => {
     // tdata is true but feedback is null => we are infering
     // use it to keep loading sign on
     
-    console.log("inferencing ",inferencing)
+    ///console.log("inferencing ",inferencing)
     /// WebSockets useEffet
 useEffect(() => {
     let dataJSON={}
@@ -153,11 +153,6 @@ useEffect(() => {
     }
     // analyse transcription
     const _analysis =getTranscriptData(tdata)
-    // add id
-    if (_analysis) {
-        // we have some data
-        _analysis.id = tdata?.id
-    }
     setAnalysis(_analysis);
     //const id = tdata?.id;
     console.log("useEffect analysis",_analysis);
@@ -200,6 +195,8 @@ useEffect(() => {
     document.location.reload();
   }, []);
 
+  // sets transcript data to state var tdata
+  // this is updated by child (AudioDownloader)
   const handleTranscriptUpdate = (tdata) => {
     setTdata(tdata);
   };
@@ -211,7 +208,7 @@ useEffect(() => {
   const [ida,tot_wc,duration,wpm,txt,tot_confidence]=analyseAllData(messages);
   
   const finalResult = analyseAllData(messages,"Final");
-
+  const firstFinalText = getFirstFinalText(messages);
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
   const confidence =tot_confidence?((tot_confidence*100)?.toFixed(0)):""
   const wpmStr = wpm===Infinity|| !wpm?"wpm": (wpm +" wpm")
@@ -259,6 +256,7 @@ useEffect(() => {
               audioBlob={createWavFile(audioSamples)} 
               fileName={'audio.wav'} 
               update={handleTranscriptUpdate}
+              command={firstFinalText}
               inferencing={inferencing}
             />:""}
             {/*STATUS */}

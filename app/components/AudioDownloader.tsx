@@ -2,8 +2,9 @@
 import {useState} from 'react';
 //import { getTranscriptData } from '~/modules/evalspeech';
 import { useLocation } from '@remix-run/react';
+//import { getFirstFinalText } from '~/modules/evalspeech';
 
-const AudioDownloader = ({ audioBlob, fileName, update ,inferencing=false}) => {
+const AudioDownloader = ({ audioBlob, fileName, update ,command="",inferencing=false}) => {
 const location = useLocation();
 const [isloading,setIsloading]=useState(false);
 let btncls = 'btn btn-xs btn-neutral btn-outline '
@@ -30,6 +31,7 @@ async function handleUpload() {
   const URL = BASEURL.join("/")+"/api/upload"
   console.log("Uploading.... ",wavefile.name,wavefile.size,URL)
   const formData = new FormData();
+  formData.append("command",command)
   formData.append("audio",wavefile);
   const options = {
       method:"POST",

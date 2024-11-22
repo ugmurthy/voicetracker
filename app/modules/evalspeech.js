@@ -59,7 +59,7 @@ export function analyseAllData(data,msgIncludes="Partial") {
     const wpm = Math.floor(tot_wc/duration); // words/minute
     return [ida,tot_wc,duration,wpm,txt,tot_confidence]
 }
-///// WORD FREQUENCY ///////////////////////////////////////////////////////////
+///// WORD FREQUENCY not used for now ///////////////////////////////////////////////////////////
 export function getWordFrequency(text) {
   // Convert text to lowercase and split into words
   // Using regex to split on any whitespace and remove punctuation
@@ -101,6 +101,14 @@ function getCumulativePercentages(frequencyAry){
   for (let i = 1; i < frequencyAry.length; i++) {
     frequencyAry[i].cumulative = parseFloat(frequencyAry[i].percentage) + frequencyAry[i-1].cumulative;
   }
+}
+////////////v NOT USED
+export function getFirstFinalText(data){
+  const final=data.filter(item=>item.message_type.includes("Final"))
+  if (final.length) {
+    return final[0].text
+  } 
+  return null;
 }
 
 
@@ -167,26 +175,46 @@ export function getTranscriptData(transcript) {
   const text = transcript.text;
   const wc = text.trim().split(/\s+/).length; //word count
   const pauses = getPPMwords(transcript.words);
-  const confidence = transcript.words.map((w)=>w.confidence)
-  const tot_confidence=_.sum(confidence)/confidence.length
+  const tot_confidence = transcript.confidence
+  const summary = transcript.summary
+  const sentiment_analysis = transcript.sentiment_analysis_results
+  const id = transcript.id
+  //const confidence = transcript.words.map((w)=>w.confidence)
+  //const tot_confidence=_.sum(confidence)/confidence.length
   let duration = transcript.audio_duration;
-  
+  const audio_url = transcript.audio_url
+  const firstline = transcript.firstline
   const d_mins = duration/60
   const wpm = wc/d_mins // words per min
   const ppm = pauses/d_mins // pauses per minute
-  const command = getCommand(transcript.words);
-  return {from:"VoiceTracker",text,pauses,duration_secs:duration,wc,wpm,ppm,confidence:tot_confidence,command}
-}
-
-const SUMMARY=['hash', 'mode', 'summary'].join('')
-
-function getCommand(words) {
-  if (words.length>5) {
-    const w = words.slice(0,5).join('');
-    if (w.includes(SUMMARY)) {
-      return {command: {text:'chat',index:_.indexOf(words,'chat')}}
-    }
-    // extend commands with ifs
-    return null;
+  /transcript.firstline.toLowerCase()
+  const command = getCommand('a catchy summary and sentiment analysis');
+  return {from:"VoiceTracker",id,text,pauses,
+    duration_secs:duration,wc,wpm,ppm,
+    confidence:tot_confidence,command, 
+    summary,sentiment_analysis,audio_url,firstline
   }
 }
+
+///const SUMMARY=['hash', 'mode', 'summary'].join('')
+
+/*
+"summarization": true,
+  "summary_model": "catchy",
+  "summary_type": "gist",
+  "sentiment_analysis":true,
+*/
+export function getCommand(firstline) {
+  const command = []
+  if (firstline.includes("summary")) {
+    command.push({summarization:true})
+  }
+  if (firstline.includes("sentiment")) {
+    command.push({sentiment_analysis:true})
+  }
+  if (firstline.includes("catchy")){
+    command.push({summary_model:'catchy'})
+    command.push({summary_type:"gist"})
+     } // extend commands with ifs
+ return command;
+  }

@@ -112,8 +112,9 @@ export async function askLeMUR(transcript_id,results) {
     }
 }
 
-export async function getTranscriptFromURL(audioURL){
+export async function getTranscriptFromURL(audioURL,command){
     try {
+        console.log(`f(getTranscriptFromURL) ${command}`)
         const params = {audio:audioURL,disfluencies:true}
         const transcript = await client.transcripts.transcribe(params)
         return transcript
