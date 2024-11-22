@@ -3,11 +3,19 @@ import {useState} from 'react';
 //import { getTranscriptData } from '~/modules/evalspeech';
 import { useLocation } from '@remix-run/react';
 
-const AudioDownloader = ({ audioBlob, fileName, update ,loading=false}) => {
+const AudioDownloader = ({ audioBlob, fileName, update ,inferencing=false}) => {
 const location = useLocation();
-const [isloading,setIsloading]=useState(loading);
+const [isloading,setIsloading]=useState(false);
 let btncls = 'btn btn-xs btn-neutral btn-outline '
+let what = ""
 if (isloading) {
+  what = "Getting Transcript..."
+}
+if (inferencing) {
+  what = "Asking LeMUR..."
+}
+
+if (isloading||inferencing) {
   btncls = btncls+ ' loading '
 }
 const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
@@ -35,7 +43,7 @@ async function handleUpload() {
       const data = await response?.json();
       //setTranscript(data);
       update(data); // update parent
-      console.log("transcript response:",isLoading,data)
+      console.log("transcript response:",isloading,data)
       setIsloading(false)
   } catch(err) {
       console.log("Error uploading audio: ",err)
@@ -76,7 +84,7 @@ async function handleUpload() {
         <div className="card-actions">
         <button onClick={handleUpload} className={btncls}>Analyse Audio</button>
         </div>
-        
+        {<div className='text-xs font-thin'>{what}</div>}
         {/* Status Message */}
         {!audioBlob && (
           <div className="text-sm text-error mt-2">

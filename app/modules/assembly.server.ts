@@ -6,7 +6,8 @@ const client = new AssemblyAI({
     apiKey: process.env.ASSEMBLY_API_KEY 
   })
 const BASEURL = "https://api.assemblyai.com/v2/";
-const APIKEY = process.env.ASSEMBLY_API_KEY;
+const APIKEY = process.env.NODE_ENV==='development'
+                ? process.env.ASSEMBLY_API_KEY:"";
 const EXPIRY=process.env.NODE_ENV==='development'?28800:480
             
 
@@ -14,11 +15,14 @@ const headers = {
     "Authorization": APIKEY,
     "content-type": "application/json",
 };
-const TOKEN= 'realtime/token'
+const TOKEN_URL= 'realtime/token'
 //// REST API
 
-export async function getAssemblyToken() {
-    const url = BASEURL + TOKEN;
+export async function getAssemblyToken(FROM_USER_APIKEY="") {
+    const url = BASEURL + TOKEN_URL;
+    headers.Authorization=process.env.NODE_ENV==='cdevelopment'
+            ? APIKEY
+            : FROM_USER_APIKEY
     //console.log('url :',url)
     const body = JSON.stringify({
         "expires_in": EXPIRY
@@ -32,13 +36,17 @@ export async function getAssemblyToken() {
 
     //console.log("======\n",response,"========\n");
     if (response.status !== 200) {
-        throw new Error("Failed to get AssemblyAI token");  
+        console.log(`f(getAssemblyToken): Failed to get AssemblyAI Token`)
+        return null
+        //throw new Error("Failed to get AssemblyAI token");  
         }
     const data = await response.json();
     console.log(`f(getAssemblyToken): getting token`)
     return data.token;
 }
-
+export async function getHeader() {
+    return headers;
+}
 export async function getTranscript(id) {
     const url = BASEURL + `transcript/${id}`;
     console.log('url :',url)

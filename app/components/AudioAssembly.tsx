@@ -12,7 +12,7 @@ import createWavFile from '~/modules/audioProcessor';
 
 
 const AudioAssembly = ({url}) => {
-    const VERSION="V0.3 21-Nov-24"
+    const VERSION="V0.4 22-Nov-24"
     //const samples=false;
     const [messages, setMessages] = useState([]);
     const wsRef = useRef(null); //  persist WebSocket instance
@@ -27,14 +27,17 @@ const AudioAssembly = ({url}) => {
     const [analysis,setAnalysis]=useState(null);
     // feedback
     const [feedback,setFeedback]=useState(null);
-
+    const [inferencing,setInferencing]=useState(false);
     const [microphone, setMicrophone] = useState(null);
     const [error, setError] = useState(null);
     const containerRef = useRef();
     const isConnecting = !error && !isOPEN && !isRecording && messages.length === 0;
     const reConnect =error || ( !isOPEN && !isRecording && messages.length  > 0);
-    const showDownLoad = reConnect && !error && !feedback;
+    const showDownLoad = reConnect && !error // && !feedback;
+    // tdata is true but feedback is null => we are infering
+    // use it to keep loading sign on
     
+    console.log("inferencing ",inferencing)
     /// WebSockets useEffet
 useEffect(() => {
     let dataJSON={}
@@ -122,6 +125,7 @@ useEffect(() => {
   useEffect(()=>{
     const  feedback= async() => {
       try {
+      setInferencing(true);
       const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
       let BASEURL=fullUrl.split("/");
       BASEURL.pop()
@@ -135,12 +139,15 @@ useEffect(() => {
       if (response.ok) {
         const result =  await response.json()
         setFeedback(result)
+        setInferencing(false);
       } else {
         console.log("Error during POST /api/feedback ", response)
+        setInferencing(false)
       }
     } // try
     catch (e){
-      console.log("Error /api/feedback ");
+      setError("Error in /api/feedback ");
+      setInferencing(false);
     }
     }
     // analyse transcription
@@ -204,7 +211,7 @@ useEffect(() => {
   const finalResult = analyseAllData(messages,"Final");
 
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
-  const confidence =tot_confidence?(tot_confidence?.toFixed(2)*100):""
+  const confidence =tot_confidence?((tot_confidence*100)?.toFixed(0)):""
   const wpmStr = wpm===Infinity|| !wpm?"wpm": (wpm +" wpm")
 
   const final_ida = finalResult[0];
@@ -249,7 +256,7 @@ useEffect(() => {
               audioBlob={createWavFile(audioSamples)} 
               fileName={'audio.wav'} 
               update={handleTranscriptUpdate}
-              loading={false}
+              inferencing={inferencing}
             />:""}
             {/*STATUS */}
           <div className='flex space-x-2 items-center mb-2'>

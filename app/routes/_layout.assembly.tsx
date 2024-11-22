@@ -1,14 +1,20 @@
 
 import {getAssemblyToken} from "~/modules/assembly.server"
-import { useLoaderData } from "@remix-run/react";
-
-//components
-
+import { redirect, useLoaderData } from "@remix-run/react";
 import AudioAssembly from "../components/AudioAssembly";
+import {  getAPIkey, getSessionToken, createAPISession } from "~/modules/session.server";
  export async function loader({request}) {
-   // fetch token from assembly AI
-   const token = await getAssemblyToken();
-  return token;
+   console.log("/assembly : loader")
+   // get session token
+   const token = await getSessionToken(request)
+   if (token) {
+        return token;
+   } else {
+            // fetch token from assembly AI
+        const apikey = await getAPIkey(request)
+        const token = await getAssemblyToken(apikey);
+        return redirect("/",{ headers: await createAPISession(apikey,token) });
+   }
  }
    
 export default function Component() {
@@ -17,7 +23,7 @@ export default function Component() {
     url = url+`&token=${token}`
     
     return (
-        <div>
+        <div className="p-4">
             <AudioAssembly url={url} />
         </div>
     ) 

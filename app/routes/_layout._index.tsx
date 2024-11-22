@@ -1,48 +1,61 @@
-import type { MetaFunction,LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
+import { redirect, } from "@remix-run/node";
+import {  validAPI ,createAPISession, authenticate} from "~/modules/session.server";
+import {Form,useActionData, useNavigation} from '@remix-run/react'
+import { getFormData } from "~/helpers/webUtils.server";
+//import { getAssemblyToken } from "~/modules/assembly.server";
 export const meta: MetaFunction = () => {
   return [
-    { title: "Remix Starter repo" },
-    { name: "description", content: "Welcome to Remix Starter Repo!" },
+    { title: "SpeechTrack" },
+    { name: "SpeechTrack", 
+      content: "Realtime Speech Analysis using Assembly AI" 
+    },
   ];
 };
 
-export async function loader(args:LoaderFunctionArgs) {
-  //console.log("LOADER /main")
-  //console.log("/main ",userId)
-  return redirect('/assembly')
+export async function loader({request}) {
+  //const apikey = await getAPIkey(request); 
+  //console.log("/ : loader :apikey ",apikey)
+  
+  if (await authenticate(request,"/")) {
+    return redirect('/assembly')
+  }
+  return {};
 }
 
+export async function action({request}) {
+  const {apikey} = await getFormData(request);
+    //const apikey = await getAPIkey(request)
+    console.log("/ : action start")
+    const token = await validAPI(apikey,"/")
+    if (token) {
+        console.log("/ : action :Autheticated & Redirecting...")
+        return redirect("/",{ headers: await createAPISession(apikey,token) });
+    }
+    return {error:"API Key Invalid or Absent!"}
+}
 export default function Index() {
+  const actionData = useActionData();
+  const MESSAGE = ""
+  const navigation = useNavigation();
   return (
-    <div className="container mx-auto max-w-lg px-4 ">
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1 className="text-blue-500 text-3xl">Welcome to Remix</h1>
-     
-    <p>
-      <br/>
-      <div className="text-xl font-semibold">This repo contains the following javascript libraries:</div>
-      <ul className="p-4">
-        <li>1. Styling using TailwindCSS and Daisy UI</li>
-        <li>2. zod and zodic for schemas, types and validations</li>
-        <li>3. Qdrant for vector databases</li>
-      </ul>
-    </p>
-    </div>
-    <ul>
-        
-        <li>
-          <a
-            target="_blank"
-            href="/sample_route"
-            rel="noreferrer"
-            className="text-blue-500 underline"
-          >
-            sample_route
-          </a>
-        </li>
-        
-      </ul>
-    </div>
+    <div className="container mx-auto max-w-md px-4">
+  
+    <Form className="pt-10 flex flex-col items-center space-y-2 " method="POST">
+        <label className='form-control w-full max-w-xs'>
+            <div className="label">
+                <span className='label-text'>Assembly API Key</span>
+                <div className="font-thin text-xs text-stone-500"><a href={"https://www.assemblyai.com/app"} target="_blank">Visit Assembly AI for key</a></div>
+            </div>
+            <input className='input input-bordered input-primary input-sm w-full max-w-xs' name="apikey" type="text"  ></input>
+        </label>
+        <button type="submit" className="btn btn-primary btn-sm">
+            
+            Submit
+        </button>
+        {(actionData?.error && actionData.error )?<div><p className="text-red-600 font-bold">{actionData.error}</p></div>:""}
+    </Form>
+    
+</div>
   );
 }

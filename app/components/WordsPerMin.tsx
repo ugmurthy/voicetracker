@@ -15,7 +15,7 @@ function WordsPerMinute({wpm}) {
   const cval = getColor(wpm);
   //console.log("WPM ",wpm===Infinity,wpm)
   const _wpm = wpm===Infinity?0: wpm;
-  const sty = { "--value": "70", "--size": "5rem", "--thickness": "8px", "background-color":"green","opacity":"0.8" };
+  const sty = { "--value": "70", "--size": "5rem", "--thickness": "4px", "background-color":"green","opacity":"0.8" };
   sty["--value"] = _wpm?.toString();
   sty["background-color"] = cval;
   //console.log("Color ",cval)

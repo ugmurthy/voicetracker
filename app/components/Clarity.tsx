@@ -7,7 +7,7 @@ function Clarity({confidence}) {
   if (clarity < 0) clarity = 0
   const cval = getColor(clarity);
 
-  const sty = { "--value": "70", "--size": "5rem", "--thickness": "8px", "background-color":"green","opacity":"0.8" };
+  const sty = { "--value": "70", "--size": "5rem", "--thickness": "4px", "background-color":"green","opacity":"0.8" };
   sty["--value"] = clarity.toString();
   sty["background-color"] = cval;
   //console.log("Color ",cval)
