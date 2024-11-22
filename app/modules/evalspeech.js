@@ -205,16 +205,16 @@ export function getTranscriptData(transcript) {
   "sentiment_analysis":true,
 */
 export function getCommand(firstline) {
-  const command = []
+  const command = {}
   if (firstline.includes("summary")) {
-    command.push({summarization:true})
+    command.summarization=true
   }
   if (firstline.includes("sentiment")) {
-    command.push({sentiment_analysis:true})
+    command.sentiment_analysis=true
   }
   if (firstline.includes("catchy")){
-    command.push({summary_model:'catchy'})
-    command.push({summary_type:"gist"})
+    command.summary_model='catchy'
+    command.summary_type="gist"
      } // extend commands with ifs
  return command;
   }
