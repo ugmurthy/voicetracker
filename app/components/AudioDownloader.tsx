@@ -1,13 +1,26 @@
 //import { Download } from 'lucide-react';
-import {useState} from 'react';
+import {useState,useEffect} from 'react';
 //import { getTranscriptData } from '~/modules/evalspeech';
-import { useLocation } from '@remix-run/react';
+import { useLocation,Link } from '@remix-run/react';
 //import { getFirstFinalText } from '~/modules/evalspeech';
+import {sleep} from "../helpers/util"
 
-const AudioDownloader = ({ audioBlob, fileName, update ,command="",inferencing=false}) => {
+const AudioDownloader = ({ audioBlob, fileName, update ,save,commandObj="",inferencing=false}) => {
 const location = useLocation();
 const [isloading,setIsloading]=useState(false);
+const [done,setDone]=useState(false);
+const [labeltxt,setLabeltxt]=useState("Analyse Audio")
+const command=commandObj?.text
 let btncls = 'btn btn-xs btn-neutral btn-outline '
+const btncls_save ='btn btn-xs btn-neutral btn-outline '
+useEffect(()=>{
+  if (inferencing) {
+    setDone(true)
+    setLabeltxt("Save Results");
+  }
+},[inferencing])
+
+
 let what = ""
 if (isloading) {
   what = "Getting Transcript..."
@@ -20,7 +33,7 @@ if (isloading||inferencing) {
   btncls = btncls+ ' loading '
 }
 const fullUrl = `${window.location.origin}${location.pathname}${location.search}`;
-let BASEURL=fullUrl.split("/");
+const BASEURL=fullUrl.split("/");
 BASEURL.pop()
 
 async function handleUpload() { 
@@ -32,6 +45,9 @@ async function handleUpload() {
   console.log("Uploading.... ",wavefile.name,wavefile.size,URL)
   const formData = new FormData();
   formData.append("command",command)
+  console.log("CommandObj ",commandObj)
+  formData.append("firstFinalTranscriptObj",JSON.stringify(commandObj))
+  //formData.append("lastFinalTranscriptObj",JSON.stringify(lastFinalObj))
   formData.append("audio",wavefile);
   const options = {
       method:"POST",
@@ -43,7 +59,7 @@ async function handleUpload() {
         throw new Error(`Error: ${response.status}`)
       }
       const data = await response?.json();
-      //setTranscript(data);
+      //return value of /api/update is sent back to parent;
       update(data); // update parent
       console.log("transcript response:",isloading,data)
       setIsloading(false)
@@ -52,6 +68,10 @@ async function handleUpload() {
   }
 }
 
+function handleSave() {
+  sleep(5000);
+  save();
+}
     const handleDownload = () => {
     
      // const audioBlob = combineAudioChunks(audioChunks);
@@ -71,6 +91,7 @@ async function handleUpload() {
     URL.revokeObjectURL(url);
   };
 
+ 
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
       <div className="card-body items-center text-center">
@@ -83,8 +104,11 @@ async function handleUpload() {
           />
         </div>
         
-        <div className="card-actions">
-        <button onClick={handleUpload} className={btncls}>Analyse Audio</button>
+        <div className="card-actions flex items-center space-x-2">
+        {!done&&<button onClick={handleUpload} className={btncls}>Analyse Audio</button>}
+        {done&&!inferencing&&<button onClick={handleSave}  className={btncls_save}>Save Result</button>}
+        {<button className={btncls_save}><a href="/addinfo" target="_blank">Show History</a></button>}
+       
         </div>
         {<div className='text-xs font-thin'>{what}</div>}
         {/* Status Message */}

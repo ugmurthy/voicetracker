@@ -103,10 +103,15 @@ function getCumulativePercentages(frequencyAry){
   }
 }
 ////////////v NOT USED
-export function getFirstFinalText(data){
+export function getFirstFinalTranscriptObj(data){
   const final=data.filter(item=>item.message_type.includes("Final"))
+  
+  
+  let size=final.length
+  //console.log('f(getTransobj)',size)
   if (final.length) {
-    return final[0].text
+    //console.log('f(getTransobj)',JSON.stringify(final))
+    return final[0];
   } 
   return null;
 }
@@ -184,15 +189,16 @@ export function getTranscriptData(transcript) {
   let duration = transcript.audio_duration;
   const audio_url = transcript.audio_url
   const firstline = transcript.firstline
+  const firstObj = transcript.firstObj;
   const d_mins = duration/60
   const wpm = wc/d_mins // words per min
   const ppm = pauses/d_mins // pauses per minute
-  /transcript.firstline.toLowerCase()
-  const command = getCommand('a catchy summary and sentiment analysis');
-  return {from:"VoiceTracker",id,text,pauses,
+  
+  const command = getCommand(transcript.firstline?.toLowerCase());
+  return {app:"SpeechTrack",id,text,pauses,
     duration_secs:duration,wc,wpm,ppm,
     confidence:tot_confidence,command, 
-    summary,sentiment_analysis,audio_url,firstline
+    summary,sentiment_analysis,audio_url,firstline,firstObj,
   }
 }
 
@@ -206,8 +212,14 @@ export function getTranscriptData(transcript) {
 */
 export function getCommand(firstline) {
   const command = {}
+  if (!firstline) {
+    return command;
+  }
+
   if (firstline.includes("summary")) {
-    command.summarization=true
+    command.summarization=true;
+    command.summary_model='informative'
+    command.summary_type='bullets'
   }
   if (firstline.includes("sentiment")) {
     command.sentiment_analysis=true
@@ -216,5 +228,6 @@ export function getCommand(firstline) {
     command.summary_model='catchy'
     command.summary_type="gist"
      } // extend commands with ifs
+ console.log("f(getComand) ",firstline,command);
  return command;
-  }
+}

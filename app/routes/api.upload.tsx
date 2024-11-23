@@ -1,3 +1,12 @@
+/*
+Imp:
+1. Get audio_end from first FinalTranscript
+2. Get commands first FinalTranscript.text
+
+
+*/
+
+
 import { fileUpload, getTranscriptFromURL } from "~/modules/assembly.server";
 //import {getFormData} from "../helpers/webUtils.server"
 import { authenticate } from "~/modules/session.server";
@@ -10,22 +19,41 @@ export async function action({ request }) {
    }
   const formData = await request.formData();
   const file = formData.get("audio");
-  const firstline = formData.get("command");
-  console.log("/api/upload ",firstline)
+  //const firstline = formData.get("command");
+  
+  let firstFinalTranscriptObj = formData.get("firstFinalTranscriptObj")
+  
+  firstFinalTranscriptObj = JSON.parse(firstFinalTranscriptObj);
+  //console.log("/api/upload ",firstFinalTranscriptObj);
+  const firstline = firstFinalTranscriptObj?.text
+  /// where should we process audio from = end of first sentencte
+  /// only if firstline contains words like (summary,sentiment)
+  const audio_starts_from = firstFinalTranscriptObj.audio_end
+  //Start UPLOAD wav file
+  const command = getCommand(firstline)
+  console.log("/api/upload first line",firstline)
+  console.log("/api/upload command ",command)
+  console.log("/api/upload first FinalTranscriptObj ",JSON.stringify(firstFinalTranscriptObj))
+
   if (!file || typeof file === "string") {
     throw new Error("File upload failed or file was not provided.");
   }
-  console.log(`/api/upload :Received file: ${file.name}`);
+  
   const data = await  fileUpload(file)
   console.timeEnd("/api/upload fileUpload")
+
+  /// START getting transcript for audio URL
   console.time("/api/upload getTranscriptFromURL")
-  /// process commands here.
-  const command = getCommand(firstline)
   let transcript_data = await getTranscriptFromURL(data.upload_url,command);
-  //console.log("/api/upload : TranscriptData : ",JSON.stringify(transcript_data))
   console.timeEnd("/api/upload getTranscriptFromURL")
+
   if(Object(transcript_data).hasOwnProperty("id")) {
-      transcript_data = {...transcript_data,firstline:firstline}
+      console.log("/api/upload : Inside IF ")  
+    //transcript_data = {...transcript_data,firstline:firstline,firstObj:firstFinalTranscriptObj}
+      transcript_data.firstline = firstline;
+      transcript_data.firstObj=firstFinalTranscriptObj;
+      console.log("/api/upload combined transcript data",transcript_data)
+      return transcript_data;
     }
-  return transcript_data;
+  return null;
 }

@@ -9,20 +9,24 @@ flushing our any results that are older. The max results to be stored is 10
 */
 // Constants
 const STORAGE_KEY = 'SpeechResults';
-const MAX_RESULTS = 10;
+const MAX_RESULTS = 3;
 
 /**
  * Saves a new result to localStorage, maintaining only the 10 most recent entries
- * @param {Object} result - The result object to store
+ * @param {Object} result - The result object to store as STRING
+ * NOTE: The object is stored as string
  */
 export const saveResult = (result) => {
   try {
+    if (!result) {
+      return true;
+    }
     // Get existing results
     const existingResults = getResults();
     
     // Add timestamp to track recency
     const resultWithTimestamp = {
-      ...result,
+      result:JSON.stringify(result),
       timestamp: new Date().toISOString()
     };
 

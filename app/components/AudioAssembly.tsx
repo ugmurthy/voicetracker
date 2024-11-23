@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {Link} from '@remix-run/react'
 import {createMicrophone} from '../modules/microphone.client'
-import { analyseAllData, getFirstFinalText, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
+import { analyseAllData,getFirstFinalTranscriptObj, getPPMtranscript, getTranscriptData} from '../modules/evalspeech'
 import WordDisplay from './WordsDisplay';
 import ShowData from './ShowData';
 import Clarity from './Clarity';
 import AudioDownloader from './AudioDownloader';
 import Markdown from './Markdown'
-
+import CommandCopy from './CommandCopy'
 import WordsPerMinute from './WordsPerMin';
 import createWavFile from '~/modules/audioProcessor.client';
-
+import {getResults,saveResult,clearResults} from '~/helpers/localStoraageUtils'
 
 const AudioAssembly = ({url}) => {
     const VERSION="V0.4 22-Nov-24"
@@ -139,6 +139,9 @@ useEffect(() => {
       const response = await fetch(URL,options);
       if (response.ok) {
         const result =  await response.json()
+        // update analysis
+        // result,punctuated_text (from transcripts)
+        setAnalysis((prevState)=> ({...prevState, ...{feedback:result,transcript_text:punctuated_text}}))
         setFeedback(result)
         setInferencing(false);
       } else {
@@ -151,7 +154,9 @@ useEffect(() => {
       setInferencing(false);
     }
     }
-    // analyse transcription
+    // analyse transcription 
+    // Some info from transcription_data (created by /api/upload ) is transferred to _analysis
+    // by following function
     const _analysis =getTranscriptData(tdata)
     setAnalysis(_analysis);
     //const id = tdata?.id;
@@ -199,7 +204,40 @@ useEffect(() => {
   // this is updated by child (AudioDownloader)
   const handleTranscriptUpdate = (tdata) => {
     setTdata(tdata);
+    console.log("f(handleTranscriptUpdate): after /api/upload returns ",tdata)
   };
+
+  // called from child component AudioDownloader
+  // save data 
+  const  handleSaveResult = ()=> {
+    console.log("From Save Button of AudioDownloader");
+    // analysis contains complete structure processed data
+    // following keys will be stored to localStorage
+    // feedback
+    // transcript_text (original from streaming data)
+    // text (final from transcript data
+    // firstObj.created
+    // duration, wc, wpm, ppm,confidence, pauses
+    // id
+    // summary
+    // sentiment_analysys
+    const s = {}
+    const a = analysis 
+      s.feedback=a.feedback;
+      s.transcript_text = a.transcript_text;
+      s.created = a.firstObj.created;
+      s.duration = a.duration;
+      s.wpm = a.wpm
+      s.ppm = a.ppm 
+      s.confidence = a.confidence;
+      s.wc = a.wc;
+      s.pause=a.pauses;
+      s.text=a.text;
+      s.summary=a.summary;
+      s.sentiment_analysis=a.sentiment_analysis;
+    saveResult(s);
+
+  }
   //[ida,tot_wc,duration,wpm,txt,tot_confidence] = analyseAllData(messages);
   // the tot_wc is cumulative word count
   // tot_confidence is cumulative confidence averaged over all partials
@@ -208,7 +246,12 @@ useEffect(() => {
   const [ida,tot_wc,duration,wpm,txt,tot_confidence]=analyseAllData(messages);
   
   const finalResult = analyseAllData(messages,"Final");
-  const firstFinalText = getFirstFinalText(messages);
+  const  firstFinalObj = getFirstFinalTranscriptObj(messages);
+  //const firstFinalObj = finalTranscriptObj?.firstTranscript
+
+  // following can be used to bind the start/end times for audio
+  //const lastFinalObj = finalTranscriptObj?.lastTranscript
+
   const durationStr = duration? Math.floor(duration*60)+ " s" : "";
   const confidence =tot_confidence?((tot_confidence*100)?.toFixed(0)):""
   const wpmStr = wpm===Infinity|| !wpm?"wpm": (wpm +" wpm")
@@ -250,13 +293,15 @@ useEffect(() => {
             <WordsPerMinute wpm={wpm}/>
             </div>
             {/*reConnect?<button onClick={clearSamples} className="btn btn-outline shadow-xl  btn-neutral btn-xs ">ReConnect</button>:""*/}
-            {reConnect?<button className="btn btn-outline shadow-xl  btn-neutral btn-xs "><Link to="/api/token">ReConnect</Link></button>:""}
+            {reConnect?<button className="btn btn-outline shadow-xl  btn-neutral btn-xs "><Link to="/api/token" reloadDocument>Next Speech</Link></button>:""}
             {/*DOWNLOAD*/}
             {showDownLoad?<AudioDownloader 
               audioBlob={createWavFile(audioSamples)} 
               fileName={'audio.wav'} 
               update={handleTranscriptUpdate}
-              command={firstFinalText}
+              save={handleSaveResult}
+              commandObj={firstFinalObj}
+              
               inferencing={inferencing}
             />:""}
             {/*STATUS */}
@@ -288,6 +333,7 @@ useEffect(() => {
           {/*Analysis&Feedback*/}
           {feedback && <div className="p-4 max-h-96 overflow-y-auto rounded-box border border-base-300">
           <Markdown markdown={'## Analysis & Feedback\n\n '+feedback}></Markdown>
+          <CommandCopy txt={'## Analysis & Feedback\n\n '+feedback} btnTxt="Copy"></CommandCopy>
           </div>}
           {/*Transcription */}
           <div ref={containerRef} className="p-4  overflow-y-auto rounded-box border border-base-300">
@@ -312,7 +358,7 @@ useEffect(() => {
        
 
          {feedback&& <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
-              <ShowData data={analysis}  label="VoiceTrack Analysis"></ShowData>
+              <ShowData data={analysis}  label="SpeechTrack Data"></ShowData>
             <ShowData data={messages}  label="Real Time Stream data"></ShowData>
           </div>}
           

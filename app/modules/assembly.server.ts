@@ -1,7 +1,7 @@
 
 
 import {AssemblyAI} from 'assemblyai'
-import {leMURbody} from './system.server'
+import {SPEECH_PROMPT,tail} from './system.server'
 const client = new AssemblyAI({
     apiKey: process.env.ASSEMBLY_API_KEY 
   })
@@ -66,6 +66,7 @@ export async function getTranscript(id) {
 }
 
 export async function fileUpload(file:File) {
+    console.time("f(fileUpload)")
     const url = BASEURL + `upload`;
     console.log('url :',url)
     try {
@@ -76,13 +77,14 @@ export async function fileUpload(file:File) {
         });
         if (response.ok) {
             const data = await response.json();
-            console.log("f(fileUpdate) : Uploaded Successfully ",data);
+            console.log("f(fileUpload) : Uploaded Successfully ",data);
             // returns obj: {upload_url: "urlstringto audio file"}
+            console.timeEnd("f(fileUpload)")
             return data;
         }
     } catch (e) {
-        console.log("f(fileUpdate) : Error uploding file ",e);
-        throw new Error("f(fileUpdate) : Error uploding file ")
+        console.log("f(fileUpload) : Error uploding file ",e);
+        throw new Error("f(fileUpload) : Error uploding file ")
     }
 }
 
@@ -92,10 +94,11 @@ export async function askLeMUR(transcript_id,results) {
     // inject Instruction prompt with
     // structured results
     // and final instruction for the task and output format
+    console.time("f(askLeMUR)")
     console.log("f(askLeMUR) command ",results?.command);
-    let prompt = leMURbody.prompt
-    prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
-    prompt = prompt+ " Provide your analysis and feedback for the transcript in MARKDOWN that is human readable"
+    const prompt = SPEECH_PROMPT + tail.Speech;
+    //prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
+    //prompt = prompt+ tail.Speech ;
     let retval
     try {
      retval = await client.lemur.task({
@@ -103,8 +106,10 @@ export async function askLeMUR(transcript_id,results) {
         prompt,
         final_model:'anthropic/claude-3-5-sonnet'
     })
-    console.log("f(askLeMUR): Response");
+    //console.log("f(askLeMUR): Response");
     //console.log(retval.response);
+    console.timeEnd("f(askLeMUR");
+
     return retval.response;
     } catch(e) {
         console.log("Error Response ",retval)
