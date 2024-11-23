@@ -51,7 +51,7 @@ function ShowMore({label,data}) {
             <p className="divider"></p>
             {text&&<SubComponent label={"Transcript"} text={text}></SubComponent>}
             {summary&&<SubComponent label={"Summary"} text={summary}>{}</SubComponent>}
-            {sentiment}&&<ShowData label="sentiment" data={sentiment}></ShowData>
+            {sentiment&&<ShowData label="sentiment" data={sentiment}></ShowData>}
         </div>
     )
 }
