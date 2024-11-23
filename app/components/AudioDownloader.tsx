@@ -28,6 +28,9 @@ if (isloading) {
 if (inferencing) {
   what = "Asking LeMUR..."
 }
+if (!inferencing&&done) {
+  what = "Saved Results"
+}
 
 if (isloading||inferencing) {
   btncls = btncls+ ' loading '
@@ -91,7 +94,13 @@ function handleSave() {
     URL.revokeObjectURL(url);
   };
 
- 
+ useEffect(()=>{
+  if (done && !inferencing) {
+    console.log("Saving Results...")
+    save();
+  } 
+ },[done])
+
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
       <div className="card-body items-center text-center">
@@ -105,9 +114,9 @@ function handleSave() {
         </div>
         
         <div className="card-actions flex items-center space-x-2">
-        {!done&&<button onClick={handleUpload} className={btncls}>Analyse Audio</button>}
-        {done&&!inferencing&&<button onClick={handleSave}  className={btncls_save}>Save Result</button>}
-        {<button className={btncls_save}><a href="/addinfo" target="_blank">Show History</a></button>}
+        {<button onClick={handleUpload} className={btncls}>Analyse Audio</button>}
+        {/*done&&!inferencing&&<button onClick={handleSave}  className={btncls_save}>Save Result</button>*/}
+        {done&&!inferencing&&<button className={btncls_save}><a href="/addinfo" target="_blank">Show History</a></button>}
        
         </div>
         {<div className='text-xs font-thin'>{what}</div>}

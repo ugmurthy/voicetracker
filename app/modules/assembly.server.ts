@@ -92,13 +92,12 @@ export async function fileUpload(file:File) {
 // use assembly.ai api to get transcript give an audio blob
 export async function askLeMUR(transcript_id,results) {
     // inject Instruction prompt with
-    // structured results
+    // structured results relating parameter
     // and final instruction for the task and output format
     console.time("f(askLeMUR)")
     //console.log("f(askLeMUR) command ",results?.command);
     const prompt = SPEECH_PROMPT + tail.Speech;
-    //prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
-    //prompt = prompt+ tail.Speech ;
+    
     let retval
     try {
      retval = await client.lemur.task({
@@ -108,7 +107,7 @@ export async function askLeMUR(transcript_id,results) {
     })
     //console.log("f(askLeMUR): Response");
     //console.log(retval.response);
-    console.timeEnd("f(askLeMUR");
+    console.timeEnd("f(askLeMUR)");
 
     return retval.response;
     } catch(e) {
