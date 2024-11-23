@@ -99,7 +99,7 @@ function handleSave() {
     console.log("Saving Results...")
     save();
   } 
- },[done])
+ },[done,inferencing])
 
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
