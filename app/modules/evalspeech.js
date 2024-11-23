@@ -211,23 +211,31 @@ export function getTranscriptData(transcript) {
   "sentiment_analysis":true,
 */
 export function getCommand(firstline) {
+  function pattern(search){
+    
+    return  new RegExp(search,"i");
+  }
+  
   const command = {}
   if (!firstline) {
     return command;
   }
 
-  if (firstline.includes("summary")) {
+  if (pattern('summary').test(firstline)) {
+  //if (firstline.includes("summary")) {
     command.summarization=true;
     command.summary_model='informative'
     command.summary_type='bullets'
   }
-  if (firstline.includes("sentiment")) {
+  //if (firstline.includes("sentiment")) {
+    if (pattern('sentiment').test(firstline)) {
     command.sentiment_analysis=true
   }
-  if (firstline.includes("catchy")){
+  if (pattern('catchy').test(firstline)) {
+  //if (firstline.includes("catchy")){
     command.summary_model='catchy'
     command.summary_type="gist"
      } // extend commands with ifs
- console.log("f(getComand) ",firstline,command);
+ console.log("f(getComand) from first FinalTranscript",firstline,command);
  return command;
 }

@@ -28,12 +28,12 @@ export async function action({ request }) {
   const firstline = firstFinalTranscriptObj?.text
   /// where should we process audio from = end of first sentencte
   /// only if firstline contains words like (summary,sentiment)
-  const audio_starts_from = firstFinalTranscriptObj.audio_end
+  const audio_start_from = firstFinalTranscriptObj.audio_end
   //Start UPLOAD wav file
   const command = getCommand(firstline)
-  console.log("/api/upload first line",firstline)
-  console.log("/api/upload command ",command)
-  console.log("/api/upload first FinalTranscriptObj ",JSON.stringify(firstFinalTranscriptObj))
+  //console.log("/api/upload first line",firstline)
+  //console.log("/api/upload command ",command)
+  //console.log("/api/upload first FinalTranscriptObj ",JSON.stringify(firstFinalTranscriptObj))
 
   if (!file || typeof file === "string") {
     throw new Error("File upload failed or file was not provided.");
@@ -44,15 +44,14 @@ export async function action({ request }) {
 
   /// START getting transcript for audio URL
   console.time("/api/upload getTranscriptFromURL")
-  let transcript_data = await getTranscriptFromURL(data.upload_url,command);
+  console.log("/api/upload getTranscriptFromURL",{...command,audio_start_from})
+  const transcript_data = await getTranscriptFromURL(data.upload_url,{...command,audio_start_from});
   console.timeEnd("/api/upload getTranscriptFromURL")
 
   if(Object(transcript_data).hasOwnProperty("id")) {
-      console.log("/api/upload : Inside IF ")  
-    //transcript_data = {...transcript_data,firstline:firstline,firstObj:firstFinalTranscriptObj}
       transcript_data.firstline = firstline;
       transcript_data.firstObj=firstFinalTranscriptObj;
-      console.log("/api/upload combined transcript data",transcript_data)
+      //console.log("/api/upload combined transcript data",transcript_data)
       return transcript_data;
     }
   return null;

@@ -95,7 +95,7 @@ export async function askLeMUR(transcript_id,results) {
     // structured results
     // and final instruction for the task and output format
     console.time("f(askLeMUR)")
-    console.log("f(askLeMUR) command ",results?.command);
+    //console.log("f(askLeMUR) command ",results?.command);
     const prompt = SPEECH_PROMPT + tail.Speech;
     //prompt = prompt+ " The quantitive results of transcript analysis are in the following json object "+JSON.stringify(results,null,0)
     //prompt = prompt+ tail.Speech ;
