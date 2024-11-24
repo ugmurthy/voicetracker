@@ -5,7 +5,7 @@ import { redirect } from "@remix-run/node"; // or "@remix-run/cloudflare" if usi
 import { authenticate } from "~/modules/session.server";
 
 export const config = {
-  maxDuration:20,
+  maxDuration:29,
 };
 export async function action({ request }) {
   if (!await authenticate(request,"/assembly")) {

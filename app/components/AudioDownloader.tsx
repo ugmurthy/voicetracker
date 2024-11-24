@@ -5,7 +5,7 @@ import { useLocation,Link } from '@remix-run/react';
 //import { getFirstFinalText } from '~/modules/evalspeech';
 import {sleep} from "../helpers/util"
 
-const AudioDownloader = ({ audioBlob, fileName, update ,save,commandObj="",inferencing=false}) => {
+const AudioDownloader = ({ audioBlob, fileName, update,errorUpdate ,save,commandObj="",inferencing=false}) => {
 const location = useLocation();
 const [isloading,setIsloading]=useState(false);
 const [done,setDone]=useState(false);
@@ -23,10 +23,10 @@ useEffect(()=>{
 
 let what = ""
 if (isloading) {
-  what = "Getting Transcript..."
+  what = "Uploading Audio & Transcript..."
 }
 if (inferencing) {
-  what = "Asking LeMUR..."
+  what = "Asking LeMUR to Evaluate Speech..."
 }
 if (!inferencing&&done) {
   what = "Saved Results"
@@ -57,9 +57,15 @@ async function handleUpload() {
       body:formData,
   }
   try {
-      const response = await fetch(URL,options);
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+      let response;
+          try {
+            response = await fetch(URL,options);
+          } catch(e) {
+            handleError("Error during Fetch" + URL)
+          }
+      if (!response?.ok) {
+          handleError(`Error: ${response?.status}`)
+          //throw new Error(`Error: ${response?.status}`)
       }
       const data = await response?.json();
       //return value of /api/update is sent back to parent;
@@ -67,8 +73,15 @@ async function handleUpload() {
       console.log("transcript response:",isloading,data)
       setIsloading(false)
   } catch(err) {
-      console.log("Error uploading audio: ",err)
+      console.log("Error uploading audio")
+      handleError("Error uploading audio")
+      
   }
+}
+
+function handleError(err_message) {
+  //console.log("Error uploading audio: ",err)
+  errorUpdate(err_message);
 }
 
 function handleSave() {

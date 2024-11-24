@@ -145,7 +145,8 @@ useEffect(() => {
         setFeedback(result)
         setInferencing(false);
       } else {
-        console.log("Error during POST /api/feedback ", response)
+        console.log("Error during POST /api/feedback ", response);
+        setError("Time-out/Bad Gateway during POST /api/feedback "+response.status)
         setInferencing(false)
       }
     } // try
