@@ -49,7 +49,7 @@ export default function Index() {
             </div>
             <input className='input input-bordered input-primary input-sm w-full max-w-xs' name="apikey" type="text"  ></input>
         </label>
-        <button type="submit" className="btn btn-primary btn-sm">
+        <button type="submit" className="btn  btn-neutral btn-outline btn-sm">
             
             Submit
         </button>
@@ -58,8 +58,8 @@ export default function Index() {
         {/*@TODO add some text providing more info  */}
         <div className="pt-4 font-thin text-xs text-stone-700">
         <div>1. The paid version of Assembly AI API allows access to the Streaming speech to text and LeMUR APIs</div>
-<div>2. Here is the full writeup for SpeechTrack on dev.to</div>
-<div>3. Here is the demo video analysing part of Steve Jobs 2005 at Stanford</div>
+<div>2. Here is the full writeup for <a href="https://dev.to/murthyug/speechtrack-5c46" className="underline font-bold text-blue-500">SpeechTrack</a>SpeechTrack on dev.to</div>
+<div>3. Here is the demo <a href="https://youtu.be/JXbwoPqLjEc" className="underline font-bold text-blue-500">video</a> analysing part of Steve Job's Speech 2005 at Stanford</div>
 </div>
     </Form>
     
