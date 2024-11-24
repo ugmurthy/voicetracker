@@ -113,7 +113,12 @@ export async function askLeMUR(transcript_id,results) {
     return retval.response;
     } catch(e) {
         console.log("Returning Error Response ")
-        return "ERROR /api/feedback :"+JSON.stringify(e)
+        console.timeEnd("f(askLeMUR)")
+        const message = `No response from client.lemur.task\n
+        Returning results data object instead\n 
+        ${JSON.stringify(results,null,2)}
+        `
+        return message;
     }
 }
 
