@@ -1,6 +1,7 @@
 # SpeechTrack
 
 [SpeechTrack](https://youtu.be/fPCqXuN4JLY)
+[![SpeechTrack](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hxd6aj8xkc35aojbnxjy.png)](https://youtu.be/fPCqXuN4JLY)
 
 ## Development
 
