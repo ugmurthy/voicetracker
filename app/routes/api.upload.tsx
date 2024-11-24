@@ -12,6 +12,7 @@ import { fileUpload, getTranscriptFromURL } from "~/modules/assembly.server";
 import { authenticate } from "~/modules/session.server";
 import { redirect } from "@remix-run/node"; // or "@remix-run/cloudflare" if using Cloudflare
 import {getCommand} from "../modules/evalspeech"
+export const maxDuration = 30;
 export async function action({ request }) {
   console.time("/api/upload fileUpload")
   if (!await authenticate(request,"/assembly")) {

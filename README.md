@@ -1,4 +1,4 @@
-# VoiceTracker
+# SpeedTracker
 
 ## Development
 
