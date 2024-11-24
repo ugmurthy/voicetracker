@@ -112,8 +112,8 @@ export async function askLeMUR(transcript_id,results) {
 
     return retval.response;
     } catch(e) {
-        console.log("Error Response ",retval)
-        return {error:e}
+        console.log("Returning Error Response ")
+        return "ERROR /api/feedback :"+JSON.stringify(e)
     }
 }
 
