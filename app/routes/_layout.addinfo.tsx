@@ -2,6 +2,9 @@ import Markdown from "~/components/Markdown";
 import ShowData from "~/components/ShowData";
 import { getResults,clearResults } from "~/helpers/localStoraageUtils";
 
+
+
+
 export async function clientLoader() {
     return null;
 }
@@ -16,7 +19,7 @@ function SubComponent({label,text}) {
         <div>
                 <div className="pb-2 text-xl">{label}</div>
                 {<div className="px-2 pb-4 text-sm text-blue-600">{text}</div>}
-            </div>
+        </div>
     )
 }
 function ShowMore({label,data}) {
@@ -68,8 +71,8 @@ const divJSX = showdata.map((j,i)=> <ShowMore key={i} label={j[1]} data={j[0]}><
 
 return (
         <div className="container">
-            <h2 className="p-2">Last 3 Speech Results</h2>
-            <div>
+            <h2 className="pt-6 text-center">Last 3 Speech Results</h2>
+            <div className="p-6">
                 {divJSX}
             </div>
             <div>

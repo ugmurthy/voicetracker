@@ -1,7 +1,7 @@
 
 
 import {AssemblyAI} from 'assemblyai'
-import {SPEECH_PROMPT,tail} from './system.server'
+import {getPrompt} from './system.server'
 const client = new AssemblyAI({
     apiKey: process.env.ASSEMBLY_API_KEY 
   })
@@ -95,9 +95,10 @@ export async function askLeMUR(transcript_id,results) {
     // structured results relating parameter
     // and final instruction for the task and output format
     console.time("f(askLeMUR)")
+    //const BACKTICKS ="\`\`\`\n"
     //console.log("f(askLeMUR) command ",results?.command);
-    const prompt = SPEECH_PROMPT + tail.Speech;
-    
+    //const prompt = SPEECH_PROMPT + tail.Speech;
+    const prompt = getPrompt(results);
     let retval
     try {
      retval = await client.lemur.task({

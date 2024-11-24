@@ -236,6 +236,6 @@ export function getCommand(firstline) {
     command.summary_model='catchy'
     command.summary_type="gist"
      } // extend commands with ifs
- console.log("f(getComand) from first FinalTranscript",firstline,command);
+ console.log("f(getComnand) from first FinalTranscript:",firstline,command);
  return command;
 }

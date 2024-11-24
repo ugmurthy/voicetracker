@@ -10,13 +10,13 @@
       "786ad08d-b978-4f48-aaac-16cb83272cba"
     ]
   } */
- export const tail = {}
+ const tail = {}
 
  tail.General = "You are a useful Assistant\n"
  tail.Speech =" \nProvide your analysis and feedback for the transcript in MARKDOWN that is human readable\n"
  tail.SpeechScore = " \nProvide an overall Speech evaluation Score on a scale of 0 to 10 as a last line\n"
 
- export const SPEECH_PROMPT = `
+const SPEECH_PROMPT = `
 You are **SpeechEvaluator**, an expert in analyzing and 
 providing constructive feedback on speech delivery. 
 Your role is to assess the quality of a speaker's 
@@ -70,4 +70,14 @@ reducing filler words like 'uh', 'um', and structuring ideas more effectively.
 With these adjustments, the speech will feel more polished and impactful.  
 Follow this format consistently to ensure feedback is constructive and actionable. 
 DO NOT APOLOGIZE FOR INFORMATION NOT AVAILABLE FOR ABOVE ANALYSIS"
+
+Below is the metrics from this Speech in JSON format. Use it to evaluate the speech.
+
  `
+const BACKTICKS = "\n```\n";
+
+export function getPrompt(result) {
+  const resultStr = BACKTICKS+JSON.stringify(result)+BACKTICKS
+  const retval = SPEECH_PROMPT + resultStr+ tail.Speech;
+  return retval;
+}

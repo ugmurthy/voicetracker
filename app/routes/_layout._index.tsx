@@ -56,6 +56,11 @@ export default function Index() {
         {(actionData?.error && actionData.error )?<div><p className="text-red-600 font-bold">{actionData.error}</p></div>:""}
     
         {/*@TODO add some text providing more info  */}
+        <div className="pt-4 font-thin text-xs text-stone-700">
+        <div>1. The paid version of Assembly AI API allows access to the Streaming speech to text and LeMUR APIs</div>
+<div>2. Here is the full writeup for SpeechTrack on dev.to</div>
+<div>3. Here is the demo video analysing part of Steve Jobs 2005 at Stanford</div>
+</div>
     </Form>
     
 </div>
