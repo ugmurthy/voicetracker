@@ -13,7 +13,7 @@ import createWavFile from '~/modules/audioProcessor.client';
 import {getResults,saveResult,clearResults} from '~/helpers/localStoraageUtils'
 
 const AudioAssembly = ({url}) => {
-    const VERSION="V0.5 23-Nov-24"
+    const VERSION="V0.6 24-Nov-24"
     //const samples=false;
     const [messages, setMessages] = useState([]);
     const wsRef = useRef(null); //  persist WebSocket instance
@@ -30,7 +30,7 @@ const AudioAssembly = ({url}) => {
     const [feedback,setFeedback]=useState(null);
     const [inferencing,setInferencing]=useState(false);
     const [microphone, setMicrophone] = useState(null);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState("");
     const containerRef = useRef();
     const isConnecting = !error && !isOPEN && !isRecording && messages.length === 0;
     const reConnect =error || ( !isOPEN && !isRecording && messages.length  > 0);
