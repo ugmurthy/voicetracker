@@ -74,14 +74,14 @@ async function handleUpload() {
       setIsloading(false)
   } catch(err) {
       console.log("Error uploading audio")
-      handleError("Error uploading audio")
+      //handleError("Error uploading audio")
       
   }
 }
 
 function handleError(err_message) {
-  //console.log("Error uploading audio: ",err)
-  errorUpdate(err_message);
+  console.log("Error uploading audio: ",err_message)
+  //errorUpdate(err_message);
 }
 
 function handleSave() {
