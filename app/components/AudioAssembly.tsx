@@ -270,7 +270,7 @@ useEffect(() => {
   const partial_ppm = partial_data?.length!==0? getPPMtranscript(partial_data)?.ppm:[];
   let feedbackFailed = "#### Mostlikely a timeout error"
   feedbackFailed = feedbackFailed + '\n\nPartial Results below:\n\n'
-  feedbackFailed = "\n```\n" + analysis?.text + "\n```\n"
+  feedbackFailed =  analysis?.text 
   return (
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-lg">
       
