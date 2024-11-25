@@ -207,7 +207,11 @@ useEffect(() => {
     setTdata(tdata);
     console.log("f(handleTranscriptUpdate): after /api/upload returns ",tdata)
   };
-
+  // used by children
+  const handleErrorUpdate = (err_message) => {
+    setError(err_message);
+    // we have a fetch error while asking leMUR.
+  }
   // called from child component AudioDownloader
   // save data 
   const  handleSaveResult = ()=> {
@@ -264,7 +268,9 @@ useEffect(() => {
   const partial_data = ida?.map(r=>messages[r[0]])
   //const final_data = finalResult[0]?.map(r=>messages[r[0]]);
   const partial_ppm = partial_data?.length!==0? getPPMtranscript(partial_data)?.ppm:[];
-  
+  let feedbackFailed = "#### Mostlikely a timeout error"
+  feedbackFailed = feedbackFailed + '\n\nPartial Results below:\n\n'
+  feedbackFailed = "\n```\n" + analysis?.text + "\n```\n"
   return (
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-lg">
       
@@ -301,8 +307,8 @@ useEffect(() => {
               fileName={'audio.wav'} 
               update={handleTranscriptUpdate}
               save={handleSaveResult}
+              errorUpdate={handleErrorUpdate}
               commandObj={firstFinalObj}
-              
               inferencing={inferencing}
             />:""}
             {/*STATUS */}
@@ -328,7 +334,9 @@ useEffect(() => {
             <span className='text-red-400 font-bold'>{error}</span>
           </div>
         )}
-        {/*Main Sections - show only if there aren't any errors */}
+        {/*Exception Section - show only  errors occur during /feedback */}
+        {(error&&analysis&&!isConnecting&&!feedback)&&<Markdown markdown={feedbackFailed}></Markdown> }
+         {/*Main Sections - show only if there aren't any errors */}
         {((!error)&&!isConnecting)&&
         <div className="p-4 space-y-4 z-10">
           {/*Analysis&Feedback*/}
@@ -357,7 +365,7 @@ useEffect(() => {
             )}
           </div>
        
-
+         
          {feedback&& <div className=" max-h-96 overflow-y-auto rounded-box border border-base-300">  
               <ShowData data={analysis}  label="SpeechTrack Data"></ShowData>
             <ShowData data={messages}  label="Real Time Stream data"></ShowData>
