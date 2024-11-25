@@ -28,7 +28,6 @@ const AudioAssembly = ({url}) => {
     const [analysis,setAnalysis]=useState(null);
     // feedback
     const [feedback,setFeedback]=useState(null);
-    const [feedbackFailed,setFeedbackFailed]=(null);
     const [inferencing,setInferencing]=useState(false);
     const [microphone, setMicrophone] = useState(null);
     const [error, setError] = useState("");
@@ -210,13 +209,7 @@ useEffect(() => {
   };
   // used by children
   const handleErrorUpdate = (err_message) => {
-    setError(err_message)
-    
-    let _feedbackFailed = "#### Mostlikely a timeout error\n\n"
-    _feedbackFailed = "leMUR took more than 30secs to evaluate so vercel.com gave up!\n\n"
-    _feedbackFailed = _feedbackFailed + '#### Transcript:\n\n'
-    _feedbackFailed =  analysis?.text
-    setFeedbackFailed(_feedbackFailed);
+    setError(err_message);
     // we have a fetch error while asking leMUR.
   }
   // called from child component AudioDownloader
@@ -275,7 +268,9 @@ useEffect(() => {
   const partial_data = ida?.map(r=>messages[r[0]])
   //const final_data = finalResult[0]?.map(r=>messages[r[0]]);
   const partial_ppm = partial_data?.length!==0? getPPMtranscript(partial_data)?.ppm:[];
-  
+  let feedbackFailed = "#### Mostlikely a timeout error"
+  feedbackFailed = feedbackFailed + '\n\nPartial Results below:\n\n'
+  feedbackFailed = "\n```\n" + analysis?.text + "\n```\n"
   return (
     <div className="flex flex-col justify-center w-full max-w-6xl mx-auto bg-base-100 shadow-lg">
       
