@@ -335,7 +335,7 @@ useEffect(() => {
           </div>
         )}
         {/*Exception Section - show only  errors occur during /feedback */}
-        {(error&&analysis&&!isConnecting&&!feedback)&&<Markdown markdown={feedbackFailed}></Markdown> }
+        {(error&&analysis&&!isConnecting&&!feedback)&&<Markdown markdown={JSON.stringify(feedbackFailed)}></Markdown> }
          {/*Main Sections - show only if there aren't any errors */}
         {((!error)&&!isConnecting)&&
         <div className="p-4 space-y-4 z-10">
