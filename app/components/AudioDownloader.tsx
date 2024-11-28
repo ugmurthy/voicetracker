@@ -10,7 +10,7 @@ const location = useLocation();
 const [isloading,setIsloading]=useState(false);
 const [done,setDone]=useState(false);
 const [labeltxt,setLabeltxt]=useState("Analyse Audio")
-const command=commandObj?.text
+const command=commandObj?.text // command object is the first FinalScript message
 let btncls = 'btn btn-xs btn-neutral btn-outline '
 const btncls_save ='btn btn-xs btn-neutral btn-outline '
 useEffect(()=>{
@@ -59,18 +59,20 @@ async function handleUpload() {
   try {
       let response;
           try {
+            // upload audio file
             response = await fetch(URL,options);
           } catch(e) {
-            handleError("Error during Fetch" + URL)
+            console.log("Error during Fetch: " + URL)
+            handleError("Error during Fetch: " + URL)
           }
       if (!response?.ok) {
+          console.log(`Error: ${response?.status}`);
           handleError(`Error: ${response?.status}`)
           //throw new Error(`Error: ${response?.status}`)
       }
       const data = await response?.json();
-      //return value of /api/update is sent back to parent;
       update(data); // update parent
-      console.log("transcript response:",isloading,data)
+      console.log("c(AudioDownloader): Transcript :",data)
       setIsloading(false)
   } catch(err) {
       console.log("Error uploading audio")
